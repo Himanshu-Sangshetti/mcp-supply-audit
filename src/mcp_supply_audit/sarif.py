@@ -1,4 +1,5 @@
 """SARIF 2.1.0 output for CI integration (GitHub code scanning, etc.)."""
+
 from . import __version__
 from .scoring import FINDINGS
 
@@ -6,7 +7,7 @@ _SARIF_LEVEL = {"HIGH": "error", "MED": "warning", "LOW": "note", "INFO": "note"
 INFORMATION_URI = "https://github.com/Himanshu-Sangshetti/mcp-supply-audit"
 
 
-def to_sarif(results):
+def to_sarif(results: list[dict]) -> dict[str, object]:
     """results: list of audit result dicts."""
     rules = []
     for fid, (sev, layer, owasp, template) in sorted(FINDINGS.items()):

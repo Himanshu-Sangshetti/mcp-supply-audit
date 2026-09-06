@@ -1,9 +1,17 @@
 """Transitive dependency tree resolution via live registry metadata."""
-from .registry import REGISTRY, ckey
+from typing import Optional
+
+from .registry import REGISTRY, Registry, ckey
 from .semver import max_satisfying
 
 
-def resolve_tree(root_pkg, root_ver, registry, meta_cache=None, max_depth=8):
+def resolve_tree(
+    root_pkg: str,
+    root_ver: str,
+    registry: Registry,
+    meta_cache: Optional[dict[str, dict]] = None,
+    max_depth: int = 8,
+) -> tuple[int, int]:
     """BFS over registry metadata. Returns (unique_dep_count, max_depth_reached)."""
     if meta_cache is None:
         meta_cache = {}

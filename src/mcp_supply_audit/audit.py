@@ -1,4 +1,6 @@
 """Per-package audit orchestration. Read-only: nothing is ever executed."""
+from typing import Optional
+
 from .capabilities import scan_tarball
 from .registry import Registry
 from .scoring import (
@@ -13,14 +15,20 @@ from .tree import resolve_tree
 SDK_PKG = "@modelcontextprotocol/sdk"
 
 
-def sdk_baseline(registry):
+def sdk_baseline(registry: Registry) -> tuple[Optional[str], dict]:
     meta = registry.package_meta(SDK_PKG)
     if "__error__" in meta:
         return None, meta
     return meta.get("dist-tags", {}).get("latest"), meta
 
 
-def audit_package(pkg, version=None, registry=None, sdk_latest=None, _sdk_meta=None):
+def audit_package(
+    pkg: str,
+    version: Optional[str] = None,
+    registry: Optional[Registry] = None,
+    sdk_latest: Optional[str] = None,
+    _sdk_meta: Optional[dict] = None,
+) -> dict:
     """Audit one npm package. Returns a result dict (or {'error': ...})."""
     registry = registry or Registry()
     meta = registry.package_meta(pkg)

@@ -3,19 +3,20 @@ import json
 import os
 import urllib.error
 import urllib.request
+from typing import Optional
 
 REGISTRY = "https://registry.npmjs.org"
 UA = {"User-Agent": "mcp-supply-audit/0.1 (read-only audit; https://github.com/Himanshu-Sangshetti/mcp-supply-audit)"}
 
 
-def default_cache_dir():
+def default_cache_dir() -> str:
     return os.environ.get(
         "MCP_SUPPLY_AUDIT_CACHE",
         os.path.join(os.path.expanduser("~"), ".cache", "mcp-supply-audit"),
     )
 
 
-def ckey(pkg):
+def ckey(pkg: str) -> str:
     """Filesystem-safe cache key for a package name."""
     return pkg.replace("@", "_").replace("/", "__")
 
@@ -27,13 +28,13 @@ class Registry:
     repeated audits (and the corpus study) don't hammer the registry.
     """
 
-    def __init__(self, cache_dir=None, use_cache=True):
+    def __init__(self, cache_dir: Optional[str] = None, use_cache: bool = True) -> None:
         self.cache_dir = cache_dir or default_cache_dir()
         self.use_cache = use_cache
         if use_cache:
             os.makedirs(self.cache_dir, exist_ok=True)
 
-    def fetch_json(self, url, cache_key=None):
+    def fetch_json(self, url: str, cache_key: Optional[str] = None) -> dict:
         p = None
         if self.use_cache and cache_key:
             p = os.path.join(self.cache_dir, cache_key + ".json")
@@ -56,7 +57,7 @@ class Registry:
         except Exception as e:
             return {"__error__": str(e)}
 
-    def fetch_bytes(self, url, cache_key=None):
+    def fetch_bytes(self, url: str, cache_key: Optional[str] = None) -> Optional[bytes]:
         p = None
         if self.use_cache and cache_key:
             p = os.path.join(self.cache_dir, cache_key + ".tgz")
@@ -74,8 +75,8 @@ class Registry:
         except Exception:
             return None
 
-    def package_meta(self, pkg):
+    def package_meta(self, pkg: str) -> dict:
         return self.fetch_json(f"{REGISTRY}/{pkg.replace('/', '%2f')}", ckey(pkg))
 
-    def tarball(self, url, pkg, version):
+    def tarball(self, url: str, pkg: str, version: str) -> Optional[bytes]:
         return self.fetch_bytes(url, f"{ckey(pkg)}-{version}")

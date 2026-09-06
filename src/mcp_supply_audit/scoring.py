@@ -7,6 +7,8 @@ triage, not verdicts (see README "Sharp edges").
 Layers: PACKAGE (dependency tree + capability surface), REGISTRY
 (provenance / signatures / publisher), SDK (currency + transport).
 """
+from typing import Optional
+
 from .semver import parse_ver
 
 # Finding catalogue: id -> (severity, layer, OWASP MCP category, template)
@@ -29,7 +31,7 @@ FINDINGS = {
 SEVERITY_ORDER = {"INFO": 0, "LOW": 1, "MED": 2, "HIGH": 3}
 
 
-def make_finding(fid, **fmt):
+def make_finding(fid: str, **fmt: object) -> dict:
     sev, layer, owasp, template = FINDINGS[fid]
     return {
         "id": fid,
@@ -40,7 +42,7 @@ def make_finding(fid, **fmt):
     }
 
 
-def score_package(tree_n, floating_direct, caps):
+def score_package(tree_n: int, floating_direct: int, caps: dict[str, int]) -> int:
     s = 100
     if tree_n > 200:
         s -= 30
@@ -61,7 +63,7 @@ def score_package(tree_n, floating_direct, caps):
     return max(0, s)
 
 
-def score_registry(provenance, signatures, publisher_trusted):
+def score_registry(provenance: bool, signatures: bool, publisher_trusted: bool) -> int:
     if provenance and publisher_trusted:
         return 100
     if provenance or publisher_trusted:
@@ -71,7 +73,9 @@ def score_registry(provenance, signatures, publisher_trusted):
     return 40
 
 
-def score_sdk(sdk_range, sdk_resolved, sdk_latest, stdio):
+def score_sdk(
+    sdk_range: Optional[str], sdk_resolved: Optional[str], sdk_latest: Optional[str], stdio: bool
+) -> int:
     s = 100
     if sdk_range is None:
         s -= 20  # not clearly on the official TS SDK
@@ -90,7 +94,7 @@ def score_sdk(sdk_range, sdk_resolved, sdk_latest, stdio):
     return max(0, s)
 
 
-def build_findings(r):
+def build_findings(r: dict) -> list[dict]:
     """Structured findings from a raw audit record."""
     out = []
     caps = r["capabilities"]

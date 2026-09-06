@@ -8,6 +8,7 @@ import argparse
 import concurrent.futures as cf
 import json
 import sys
+from typing import Optional
 
 from . import __version__
 from .audit import audit_package, sdk_baseline
@@ -15,12 +16,12 @@ from .registry import Registry
 from .sarif import to_sarif
 
 
-def _bar(score, width=10):
+def _bar(score: int, width: int = 10) -> str:
     filled = max(0, min(width, round(score / 100 * width)))
     return "#" * filled + "-" * (width - filled)
 
 
-def _print_human(r):
+def _print_human(r: dict) -> None:
     if "error" in r:
         print(f"\n{r['package']}: ERROR {r['error']}")
         return
@@ -47,7 +48,7 @@ def _print_human(r):
         print(f"  {f['severity']:4s} [{f['layer']:7s}] {f['message']}  ({f['owasp']}, {f['id']})")
 
 
-def main(argv=None):
+def main(argv: Optional[list[str]] = None) -> int:
     ap = argparse.ArgumentParser(
         prog="mcp-supply-audit",
         description="Read-only supply-chain auditor for MCP servers. Nothing is executed.",

@@ -5,14 +5,18 @@ server package.json files (^, ~, exact, >=, <=, >, <, x-ranges, ||).
 Not a full node-semver implementation — see README "Sharp edges".
 """
 import re
+from collections.abc import Iterable
+from typing import Optional
+
+Version = tuple[int, int, int]
 
 
-def parse_ver(v):
+def parse_ver(v: str) -> Optional[Version]:
     m = re.match(r"^(\d+)\.(\d+)\.(\d+)", v)
     return tuple(map(int, m.groups())) if m else None
 
 
-def satisfies(ver, rng):
+def satisfies(ver: str, rng: str) -> bool:
     pv = parse_ver(ver)
     if pv is None:
         return False
@@ -22,7 +26,7 @@ def satisfies(ver, rng):
     return any(_satisfies_and(pv, alt.strip()) for alt in rng.split("||"))
 
 
-def _satisfies_and(pv, alt):
+def _satisfies_and(pv: Version, alt: str) -> bool:
     for tok in alt.split():
         if tok.startswith("^"):
             b = parse_ver(tok[1:])
@@ -66,7 +70,7 @@ def _satisfies_and(pv, alt):
     return True
 
 
-def max_satisfying(versions, rng):
+def max_satisfying(versions: Iterable[str], rng: str) -> Optional[str]:
     cands = []
     for v in versions:
         pv = parse_ver(v)
@@ -77,7 +81,7 @@ def max_satisfying(versions, rng):
     return max(cands)[1] if cands else None
 
 
-def is_floating(rng):
+def is_floating(rng: object) -> bool:
     """A range that can silently move to new code on reinstall."""
     if not isinstance(rng, str):
         return False

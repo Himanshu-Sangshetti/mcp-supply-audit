@@ -7,6 +7,7 @@ executed — this is a regex surface scan, not a proof of behavior
 import io
 import re
 import tarfile
+from typing import Optional
 
 CAP_PATTERNS = {
     "exec": re.compile(r"child_process|execSync|spawnSync|\bspawn\(|\bexec\(", re.I),
@@ -21,7 +22,9 @@ SOURCE_EXT = re.compile(r"\.(js|mjs|cjs|ts)$")
 SKIP_PATHS = ("/test", "__tests__", ".test.", ".d.ts")
 
 
-def scan_tarball(tgz_bytes, max_files=400, max_file_size=2_000_000):
+def scan_tarball(
+    tgz_bytes: Optional[bytes], max_files: int = 400, max_file_size: int = 2_000_000
+) -> tuple[dict[str, int], int]:
     """Return (capabilities dict, files_scanned)."""
     caps = {k: 0 for k in CAP_PATTERNS}
     if not tgz_bytes:
