@@ -20,7 +20,25 @@ against the live npm registry.
 | Filesystem + outbound network (exfil shape) | 19% |
 | STDIO transport | 85% |
 | No provenance attestation | 70% |
-| Overall score | median 72 · spread 57–82 |
+| Published via OIDC trusted publishing | 28% |
+| Install-time lifecycle scripts (`postinstall`) | 1 server (`@wonderwhy-er/desktop-commander`) |
+| Overall score | median 72 · spread 57–88 |
+
+## Re-run history
+
+**2026-09-07 — re-run with lifecycle detection (tool v0.1.0+).** Two deliberate changes vs
+the 2026-09-06 snapshot; same cached registry metadata, so deltas are tool changes, not
+registry drift:
+
+1. **Rubric addition:** `MSA-P007` — install-time lifecycle scripts dock the package score
+   20 pts. Affected 1/47 servers (`@wonderwhy-er/desktop-commander`: package 20 → 0).
+2. **Signal fix:** `_npmUser.trustedPublisher` (OIDC) was not extracted in the original run;
+   it now is. 11 servers gained registry points they had earned (registry 80 → 100),
+   lifting the overall spread's top end from 82 to 88. The original snapshot
+   *under-reported* trusted publishing.
+
+Base-rate metrics (floating ranges, dep counts, capability shapes, provenance) are
+unchanged — they don't depend on either change.
 
 ## Files
 

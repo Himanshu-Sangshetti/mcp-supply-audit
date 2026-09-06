@@ -80,7 +80,7 @@ popular community servers, and the Chinese ecosystem). Headline base rates:
 | **19%** | have the filesystem + network exfiltration shape |
 | **85%** | use STDIO transport |
 | **70%** | have no build provenance |
-| **72** | median overall score (spread 57–82) |
+| **72** | median overall score (spread 57–88) |
 
 Full data, method, and reproduction steps: [`corpus/`](corpus/README.md). One command
 re-runs the entire study.
