@@ -1,0 +1,34 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mcp-supply-audit"
+version = "0.1.0"
+description = "Read-only supply-chain auditor for MCP servers: transitive dependency tree, registry provenance, SDK currency, capability surface."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Himanshu Sangshetti", email = "himanshu.sangshetti@mem0.ai" }]
+keywords = ["mcp", "model-context-protocol", "supply-chain", "security", "audit", "owasp"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Security",
+]
+dependencies = []
+
+[project.scripts]
+mcp-supply-audit = "mcp_supply_audit.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/Himanshu-Sangshetti/mcp-supply-audit"
+Repository = "https://github.com/Himanshu-Sangshetti/mcp-supply-audit"
+Issues = "https://github.com/Himanshu-Sangshetti/mcp-supply-audit/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mcp_supply_audit"]

@@ -1,0 +1,30 @@
+name: mcp-supply-audit
+description: Audit an MCP server's supply chain (package tree, registry provenance, SDK currency) before you trust it.
+author: Himanshu Sangshetti
+branding:
+  icon: shield
+  color: red
+inputs:
+  package:
+    description: npm package name of the MCP server to audit (e.g. @modelcontextprotocol/server-filesystem)
+    required: true
+  fail-under:
+    description: Fail the workflow if the overall score is below this number (0-100)
+    required: false
+    default: "0"
+  sarif:
+    description: Also write results to mcp-supply-audit.sarif for code-scanning upload
+    required: false
+    default: "false"
+runs:
+  using: composite
+  steps:
+    - name: Audit MCP server supply chain
+      shell: bash
+      run: |
+        pipx run mcp-supply-audit "${{ inputs.package }}" --fail-under "${{ inputs.fail-under }}"
+    - name: Emit SARIF (optional)
+      if: inputs.sarif == 'true'
+      shell: bash
+      run: |
+        pipx run mcp-supply-audit "${{ inputs.package }}" --sarif > mcp-supply-audit.sarif
