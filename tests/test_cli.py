@@ -6,10 +6,14 @@ from mcp_supply_audit import __version__
 from mcp_supply_audit.cli import main
 
 
-def test_help_and_version_exit_clean():
+def test_help_and_version_exit_clean(capsys):
     with pytest.raises(SystemExit) as hi:
         main(["-h"])
     assert hi.value.code == 0
+    help_out = capsys.readouterr().out
+    assert "examples:" in help_out
+    assert "--explain" in help_out
+    assert "--completions" in help_out
     with pytest.raises(SystemExit) as vi:
         main(["--tool-version"])
     assert vi.value.code == 0

@@ -42,6 +42,7 @@ mcp-supply-audit --report results.json            # markdown headline + score ta
 mcp-supply-audit mcp --ecosystem pypi             # PyPI thin slice (direct deps + sdist scan)
 mcp-supply-audit --explain MSA-P007               # why this finding exists + what to do
 mcp-supply-audit --explain                        # all finding ids
+eval "$(mcp-supply-audit --completions bash)"     # bash; also zsh, fish
 ```
 
 **Diff mode** compares two releases of the same package — the postmark-mcp attack was

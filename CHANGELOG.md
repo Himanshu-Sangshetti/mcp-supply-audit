@@ -18,6 +18,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   Scoring values unchanged.
 - `--explain [ID]` prints rationale + remediation for any `MSA-*` finding
   (omit ID to list all). Offline, no score change.
+- `--completions {bash,zsh,fish}` prints a completion script. `--help` now
+  has a man-style examples epilog.
 - Diff mode: `mcp-supply-audit <pkg> --diff <v1> <v2>` compares two releases of the same
   package — the rug-pull detector. New findings: `MSA-D001` lifecycle script added (HIGH),
   `MSA-D002` publisher changed (HIGH), `MSA-D003` provenance dropped, `MSA-D004` new

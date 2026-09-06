@@ -12,6 +12,8 @@ from typing import Optional
 
 from . import __version__
 from .audit import audit_package, audit_pypi_package, sdk_baseline
+from .completions import SHELLS
+from .completions import render as render_completions
 from .diff import diff_audits
 from .explain import explain, explain_all, known_ids
 from .lock import check_lock, default_lock_path, read_lock, write_lock
@@ -63,10 +65,27 @@ def _print_human(r: dict) -> None:
         print(f"  {f['severity']:4s} [{f['layer']:7s}] {f['message']}  ({f['owasp']}, {f['id']})")
 
 
+_EPILOG = """examples:
+  mcp-supply-audit @modelcontextprotocol/server-filesystem
+  mcp-supply-audit <pkg> --json --fail-under 70
+  mcp-supply-audit <pkg> --diff 1.0.15 1.0.16
+  mcp-supply-audit --explain MSA-P007
+  eval "$(mcp-supply-audit --completions bash)"
+
+Nothing fetched is executed. Scores are heuristics — see docs/CALIBRATION.md.
+"""
+
+
 def main(argv: Optional[list[str]] = None) -> int:
     ap = argparse.ArgumentParser(
         prog="mcp-supply-audit",
-        description="Read-only supply-chain auditor for MCP servers. Nothing is executed.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=(
+            "Read-only supply-chain auditor for MCP servers.\n"
+            "Layers: package tree, registry provenance, SDK currency.\n"
+            "Nothing is downloaded-and-run. No API token required."
+        ),
+        epilog=_EPILOG,
     )
     ap.add_argument("packages", nargs="*", help="npm package names to audit")
     ap.add_argument("--corpus", help="file with one package name per line")
@@ -92,6 +111,8 @@ def main(argv: Optional[list[str]] = None) -> int:
     ap.add_argument("--ecosystem", choices=("npm", "pypi"), default="npm",
                     help="package ecosystem (default: npm). pypi is a thin first slice: "
                          "direct requires_dist + sdist scan, no transitive resolver")
+    ap.add_argument("--completions", metavar="SHELL",
+                    help=f"print a completion script ({', '.join(SHELLS)})")
     ap.add_argument("-V", "--tool-version", action="version", version=f"mcp-supply-audit {__version__}")
     args = ap.parse_args(argv)
 
@@ -102,6 +123,12 @@ def main(argv: Optional[list[str]] = None) -> int:
     if args.report:
         with open(args.report) as f:
             print(to_markdown(json.load(f)), end="")
+        return 0
+    if args.completions:
+        try:
+            print(render_completions(args.completions), end="")
+        except KeyError:
+            ap.error(f"unknown shell {args.completions!r} — known: {', '.join(SHELLS)}")
         return 0
     if args.explain is not None:
         if args.explain == "*":
