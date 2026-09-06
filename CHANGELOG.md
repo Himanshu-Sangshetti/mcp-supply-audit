@@ -6,6 +6,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+- Lifecycle-script detection: `preinstall`/`install`/`postinstall` in the published
+  `package.json` now raise `MSA-P007` (HIGH, MCP04) and dock the package score 20 pts —
+  install-time code execution means installing is enough, the server never has to start.
+  `prepare` raises `MSA-P008` (INFO) since it only runs for git-dependency installs.
+  SARIF rule count: 13 → 15.
+
 ## [0.1.0] - 2026-09-07
 
 Initial scaffold. Read-only npm supply-chain auditor for MCP servers.

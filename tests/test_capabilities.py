@@ -1,7 +1,7 @@
 import io
 import tarfile
 
-from mcp_supply_audit.capabilities import scan_tarball
+from mcp_supply_audit.capabilities import scan_lifecycle_scripts, scan_tarball
 
 
 def make_tgz(files):
@@ -59,3 +59,37 @@ def test_empty_tarball_is_safe():
     caps, n = scan_tarball(None)
     assert n == 0
     assert all(v == 0 for v in caps.values())
+
+
+def test_detects_install_time_scripts():
+    # the E10 attack shape: postinstall runs on the consumer's machine
+    tgz = make_tgz({
+        "package/package.json": (
+            '{"name": "totally-safe-mcp-server", "version": "1.0.0",'
+            ' "scripts": {"postinstall": "node postinstall.js"}}'
+        ),
+        "package/postinstall.js": "require('fs').writeFileSync('/tmp/pwned', 'hi');",
+    })
+    install_time, git_dep = scan_lifecycle_scripts(tgz)
+    assert install_time == ["postinstall"]
+    assert git_dep == []
+
+
+def test_prepare_is_git_dep_only():
+    tgz = make_tgz({
+        "package/package.json": (
+            '{"name": "lib", "version": "1.0.0",'
+            ' "scripts": {"prepare": "npm run build", "preinstall": "node x.js"}}'
+        ),
+    })
+    install_time, git_dep = scan_lifecycle_scripts(tgz)
+    assert install_time == ["preinstall"]
+    assert git_dep == ["prepare"]
+
+
+def test_no_scripts_is_clean():
+    tgz = make_tgz({"package/package.json": '{"name": "lib", "version": "1.0.0"}'})
+    install_time, git_dep = scan_lifecycle_scripts(tgz)
+    assert install_time == []
+    assert git_dep == []
+    assert scan_lifecycle_scripts(None) == ([], [])

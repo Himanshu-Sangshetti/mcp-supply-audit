@@ -57,6 +57,19 @@ the exfiltration shape (read something, send it somewhere) regardless of intent.
 data flow; obfuscated code (base64 blobs, hex escapes) is not yet decoded (roadmap).
 False positives are expected and acceptable — the tool is a triage aid.
 
+### Lifecycle scripts (install-time execution)
+
+The published `package.json` is also read from the tarball for npm lifecycle scripts:
+
+| Script | When it runs | Signal |
+|---|---|---|
+| `preinstall` / `install` / `postinstall` | on the **consumer's** `npm install <pkg>` from the registry | `MSA-P007` HIGH, −20 package pts |
+| `prepare` | on local dev install and **git-dependency** installs (not registry installs) | `MSA-P008` INFO |
+
+This is the highest-signal check in the package layer: a malicious `postinstall` runs
+arbitrary code before the MCP server is ever started — the package doesn't need to be
+*run* to be dangerous, only *installed*.
+
 ## 4. Registry trust signals
 
 | Signal | Field | Meaning |

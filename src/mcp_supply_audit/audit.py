@@ -1,7 +1,7 @@
 """Per-package audit orchestration. Read-only: nothing is ever executed."""
 from typing import Optional
 
-from .capabilities import scan_tarball
+from .capabilities import scan_lifecycle_scripts, scan_tarball
 from .registry import Registry
 from .scoring import (
     build_findings,
@@ -67,6 +67,7 @@ def audit_package(
     tarball_url = dist.get("tarball")
     tgz = registry.tarball(tarball_url, pkg, tag) if tarball_url else None
     caps, files_scanned = scan_tarball(tgz)
+    install_scripts, git_dep_scripts = scan_lifecycle_scripts(tgz)
 
     # Transitive tree
     meta_cache = {pkg: meta, SDK_PKG: sdk_meta}
@@ -88,11 +89,13 @@ def audit_package(
         "tree_depth": depth,
         "capabilities": caps,
         "files_scanned": files_scanned,
+        "install_scripts": install_scripts,
+        "prepare_script": bool(git_dep_scripts),
         "sdk_range": sdk_range,
         "sdk_resolved": sdk_resolved,
         "sdk_latest": sdk_latest,
     }
-    result["score_package"] = score_package(tree_n, floating, caps)
+    result["score_package"] = score_package(tree_n, floating, caps, len(install_scripts))
     result["score_registry"] = score_registry(provenance, signatures > 0, publisher_trusted)
     result["score_sdk"] = score_sdk(sdk_range, sdk_resolved, sdk_latest, caps.get("stdio", 0) > 0)
     result["score_overall"] = round(

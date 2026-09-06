@@ -21,6 +21,8 @@ def test_package_deductions_stack():
     assert score_package(10, 0, caps) == 60
     # floating ranges cost another 10
     assert score_package(10, 2, caps) == 50
+    # lifecycle scripts cost 20 (install-time execution)
+    assert score_package(10, 0, NO_CAPS, install_scripts=1) == 80
 
 
 def test_registry_ladder():
@@ -51,11 +53,15 @@ def test_findings_map_to_owasp():
         "sdk_range": "^1.0.0",
         "sdk_resolved": "1.0.0",
         "sdk_latest": "1.2.0",
+        "install_scripts": ["postinstall"],
+        "prepare_script": True,
     }
     findings = build_findings(r)
     ids = {f["id"] for f in findings}
-    assert {"MSA-P001", "MSA-P002", "MSA-P003", "MSA-P004", "MSA-P005",
+    assert {"MSA-P001", "MSA-P002", "MSA-P003", "MSA-P004", "MSA-P005", "MSA-P007", "MSA-P008",
             "MSA-R001", "MSA-R002", "MSA-R003", "MSA-S001", "MSA-S002", "MSA-S003"} <= ids
     assert all(f["owasp"].startswith("MCP") for f in findings)
-    # sorted by severity, HIGH/MED first
-    assert findings[0]["severity"] == "MED"
+    # sorted by severity — the HIGH lifecycle finding leads
+    assert findings[0]["id"] == "MSA-P007"
+    assert findings[0]["severity"] == "HIGH"
+    assert "postinstall" in findings[0]["message"]

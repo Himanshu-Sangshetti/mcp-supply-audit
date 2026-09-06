@@ -5,6 +5,7 @@ executed — this is a regex surface scan, not a proof of behavior
 (see README "Sharp edges").
 """
 import io
+import json
 import re
 import tarfile
 from typing import Optional
@@ -54,3 +55,43 @@ def scan_tarball(
     except Exception:
         pass
     return caps, n
+
+
+# Scripts that execute on the CONSUMER's machine during `npm install <pkg>`
+# from the registry. This is the E10 attack: install-time code execution.
+INSTALL_TIME_SCRIPTS = ("preinstall", "install", "postinstall")
+# `prepare` does NOT run for registry installs — but it DOES run when the
+# package is installed as a git dependency (and in local dev). Lower signal.
+GIT_DEP_SCRIPTS = ("prepare",)
+
+
+def scan_lifecycle_scripts(tgz_bytes: Optional[bytes]) -> tuple[list[str], list[str]]:
+    """Read package.json from the tarball; return (install_time, git_dep) scripts.
+
+    install_time: scripts that run on a consumer's `npm install` (HIGH signal).
+    git_dep: scripts that run only for git-dependency installs (INFO signal).
+    """
+    install_time: list[str] = []
+    git_dep: list[str] = []
+    if not tgz_bytes:
+        return install_time, git_dep
+    try:
+        with tarfile.open(fileobj=io.BytesIO(tgz_bytes), mode="r:gz") as tf:
+            member = next(
+                (m for m in tf.getmembers() if m.isfile() and m.name.endswith("package/package.json")),
+                None,
+            )
+            if member is None:
+                return install_time, git_dep
+            f = tf.extractfile(member)
+            if not f:
+                return install_time, git_dep
+            pkg_json = json.loads(f.read().decode("utf-8", errors="ignore"))
+    except Exception:
+        return install_time, git_dep
+    scripts = pkg_json.get("scripts", {})
+    if not isinstance(scripts, dict):
+        return install_time, git_dep
+    install_time = [s for s in INSTALL_TIME_SCRIPTS if scripts.get(s)]
+    git_dep = [s for s in GIT_DEP_SCRIPTS if scripts.get(s)]
+    return install_time, git_dep

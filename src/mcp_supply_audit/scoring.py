@@ -19,6 +19,8 @@ FINDINGS = {
     "MSA-P004": ("MED", "package", "MCP04", "combines filesystem read + outbound network — the postmark-mcp exfiltration shape"),
     "MSA-P005": ("LOW", "package", "MCP01", "reads environment variables and has outbound network — env exfiltration shape"),
     "MSA-P006": ("HIGH", "package", "MCP05", "eval / new Function in published source"),
+    "MSA-P007": ("HIGH", "package", "MCP04", "lifecycle scripts run arbitrary code on install: {scripts} — installing is enough, the server never has to start"),
+    "MSA-P008": ("INFO", "package", "MCP04", "prepare script — executes if installed as a git dependency"),
     "MSA-R001": ("MED", "registry", "MCP04", "no provenance attestation — build origin unverifiable"),
     "MSA-R002": ("LOW", "registry", "MCP04", "no registry signatures on the published artifact"),
     "MSA-R003": ("LOW", "registry", "MCP04", "published from a personal account without trusted publishing (OIDC)"),
@@ -42,7 +44,9 @@ def make_finding(fid: str, **fmt: object) -> dict:
     }
 
 
-def score_package(tree_n: int, floating_direct: int, caps: dict[str, int]) -> int:
+def score_package(
+    tree_n: int, floating_direct: int, caps: dict[str, int], install_scripts: int = 0
+) -> int:
     s = 100
     if tree_n > 200:
         s -= 30
@@ -52,6 +56,8 @@ def score_package(tree_n: int, floating_direct: int, caps: dict[str, int]) -> in
         s -= 10
     if floating_direct > 0:
         s -= 10
+    if install_scripts:
+        s -= 20  # arbitrary code runs at install time (the E10 attack)
     if caps.get("exec"):
         s -= 10
     if caps.get("eval"):
@@ -110,6 +116,10 @@ def build_findings(r: dict) -> list[dict]:
         out.append(make_finding("MSA-P005"))
     if caps.get("eval"):
         out.append(make_finding("MSA-P006"))
+    if r.get("install_scripts"):
+        out.append(make_finding("MSA-P007", scripts=", ".join(r["install_scripts"])))
+    if r.get("prepare_script"):
+        out.append(make_finding("MSA-P008"))
     if not r["provenance"]:
         out.append(make_finding("MSA-R001"))
     if not r["signatures"]:

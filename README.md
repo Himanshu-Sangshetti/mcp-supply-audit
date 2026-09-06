@@ -43,7 +43,7 @@ Zero runtime dependencies. Python ≥ 3.9. Works offline once the registry cache
 
 | Layer | Signals | Source |
 |---|---|---|
-| **Package** | full transitive dependency count + depth, floating direct ranges (`^`/`~`/`*`), capability surface of the published tarball (process exec, outbound network, filesystem, env reads, `eval`, STDIO transport) | live registry metadata + tarball source, read never executed |
+| **Package** | full transitive dependency count + depth, floating direct ranges (`^`/`~`/`*`), lifecycle scripts (`preinstall`/`install`/`postinstall` run on the consumer's machine; `prepare` runs for git-dep installs), capability surface of the published tarball (process exec, outbound network, filesystem, env reads, `eval`, STDIO transport) | live registry metadata + tarball source, read never executed |
 | **Registry** | `dist.attestations.provenance`, `dist.signatures`, `_npmUser.trustedPublisher` (OIDC vs personal account), publish recency | live registry metadata |
 | **SDK** | `@modelcontextprotocol/sdk` range vs the current release, floating SDK ranges, STDIO transport usage | registry + source |
 
