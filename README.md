@@ -112,7 +112,8 @@ Different tools watch different boundaries — they complement each other:
 ## Sharp edges (read before citing scores)
 
 - **Heuristic, not proof.** A capability regex flags surface, not behavior. A filesystem
-  server *should* read files. Use scores for triage, not verdicts.
+  server *should* read files. Use scores for triage, not verdicts. `MSA-P009`
+  (obfuscation) is a shape match — we do not decode or emulate the payload.
 - **Signal, not verdict.** A personal publisher account lowers the registry score; plenty of
   excellent servers are personally published.
 - **PyPI is a thin first slice.** `--ecosystem pypi` scans the published sdist and

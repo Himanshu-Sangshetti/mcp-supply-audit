@@ -13,7 +13,8 @@ Status of work that is shipped, next, or blocked on a public launch.
 
 ## Next
 
-- Capability patterns v2: obfuscation signals (base64+eval, hex escapes), obvious exfil endpoints
+- Capability patterns v2 remainder: obvious exfil endpoints, suspicious postinstall chains
+  (obfuscation slice ships as `MSA-P009`, score-neutral)
 - Semver edge cases (hyphen ranges, `||` + prerelease) to match node-semver more closely
 - Score calibration note: what each band means against the corpus
 - `--explain <finding-id>` — full rationale + remediation

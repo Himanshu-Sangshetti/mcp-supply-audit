@@ -77,6 +77,37 @@ def test_detects_python_capabilities():
     assert caps["stdio"] >= 1
 
 
+def test_detects_obfuscation_shapes():
+    tgz = make_tgz({
+        "package/payload.js": (
+            "const s = atob('aGVsbG8=');\n"
+            "eval(s);\n"
+            "Buffer.from(s, 'base64');\n"
+        ),
+    })
+    caps, n = scan_tarball(tgz)
+    assert n == 1
+    assert caps["obfuscation"] >= 2
+    # existing eval signal still fires; score deductions unchanged
+    assert caps["eval"] >= 1
+
+
+def test_dense_hex_escapes_count_as_obfuscation():
+    payload = "var x = '" + "".join(f"\\x{i:02x}" for i in range(24)) + "';\n"
+    tgz = make_tgz({"package/packed.js": payload})
+    caps, n = scan_tarball(tgz)
+    assert n == 1
+    assert caps["obfuscation"] >= 1
+
+
+def test_plain_eval_is_not_obfuscation():
+    tgz = make_tgz({"package/index.js": "eval('1+1');\n"})
+    caps, n = scan_tarball(tgz)
+    assert n == 1
+    assert caps["eval"] >= 1
+    assert caps["obfuscation"] == 0
+
+
 def test_empty_tarball_is_safe():
     caps, n = scan_tarball(None)
     assert n == 0

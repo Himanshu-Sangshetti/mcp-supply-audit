@@ -56,13 +56,14 @@ caps). Six signals. Python extras (`subprocess`, `httpx`, `os.environ`, …) app
 | `env_read` | `process.env`; `os.environ`, `os.getenv` | credential access |
 | `eval` | `eval(`, `new Function(` | dynamic code — MCP05 |
 | `stdio` | `StdioServerTransport`; `stdio_server` | STDIO transport — launch-command exposure |
+| `obfuscation` | `atob` / `Buffer.from(...,'base64')` / `fromCharCode` / `b64decode`; ≥20 `\\xNN` escapes in one file | decode-then-run shape — MCP05. **Finding only (`MSA-P009`). Does not change scores.** |
 
 **This is a surface scan, not behavior analysis.** A filesystem server *should* contain
 `fs.readFile`. The compound signals are where meaning lives: `filesystem + network_out` is
 the exfiltration shape (read something, send it somewhere) regardless of intent.
 
 **Known limits:** minified bundles can both hide and inflate signals; regexes don't follow
-data flow; obfuscated code (base64 blobs, hex escapes) is not yet decoded (roadmap).
+data flow; we flag obfuscation *shapes* (`MSA-P009`) but do not decode or emulate them.
 False positives are expected and acceptable — the tool is a triage aid.
 
 ### Lifecycle scripts (install-time execution)

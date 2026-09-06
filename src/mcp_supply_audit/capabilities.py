@@ -33,8 +33,27 @@ PY_CAP_PATTERNS = {
     "stdio": re.compile(r"stdio_server|StdioServerParameters"),
 }
 
+# Informational only — does NOT feed score_package (corpus scores stay put)
+OBFUSCATION_PATTERNS = (
+    re.compile(r"\batob\(", re.I),
+    re.compile(r"Buffer\.from\([^;]{0,120}['\"]base64", re.I),
+    re.compile(r"String\.fromCharCode\(", re.I),
+    re.compile(r"base64\.b64decode|base64\.b64encode", re.I),
+    re.compile(r"(?:eval|Function|exec)\([^)]{0,80}(?:atob|fromCharCode|b64decode)", re.I),
+)
+HEX_ESCAPES = re.compile(r"\\x[0-9a-fA-F]{2}")
+HEX_ESCAPE_FLOOR = 20
+
 SOURCE_EXT = re.compile(r"\.(js|mjs|cjs|ts|py)$")
 SKIP_PATHS = ("/test", "/tests", "__tests__", ".test.", ".d.ts")
+
+
+def obfuscation_hits(src: str) -> int:
+    """Count decode-then-run / dense-escape shapes. Heuristic, not proof."""
+    n = sum(len(p.findall(src)) for p in OBFUSCATION_PATTERNS)
+    if len(HEX_ESCAPES.findall(src)) >= HEX_ESCAPE_FLOOR:
+        n += 1
+    return n
 
 
 def scan_tarball(
@@ -42,6 +61,7 @@ def scan_tarball(
 ) -> tuple[dict[str, int], int]:
     """Return (capabilities dict, files_scanned)."""
     caps = {k: 0 for k in CAP_PATTERNS}
+    caps["obfuscation"] = 0
     if not tgz_bytes:
         return caps, 0
     n = 0
@@ -67,6 +87,7 @@ def scan_tarball(
                 patterns = PY_CAP_PATTERNS if m.name.endswith(".py") else CAP_PATTERNS
                 for k, pat in patterns.items():
                     caps[k] += len(pat.findall(src))
+                caps["obfuscation"] += obfuscation_hits(src)
     except Exception:
         pass
     return caps, n

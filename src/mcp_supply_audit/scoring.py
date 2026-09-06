@@ -21,6 +21,7 @@ FINDINGS = {
     "MSA-P006": ("HIGH", "package", "MCP05", "eval / new Function in published source"),
     "MSA-P007": ("HIGH", "package", "MCP04", "lifecycle scripts run arbitrary code on install: {scripts} — installing is enough, the server never has to start"),
     "MSA-P008": ("INFO", "package", "MCP04", "prepare script — executes if installed as a git dependency"),
+    "MSA-P009": ("MED", "package", "MCP05", "obfuscation signals in published source (base64 decode, fromCharCode, or dense hex escapes) — heuristic, not proof"),
     "MSA-R001": ("MED", "registry", "MCP04", "no provenance attestation — build origin unverifiable"),
     "MSA-R002": ("LOW", "registry", "MCP04", "no registry signatures on the published artifact"),
     "MSA-R003": ("LOW", "registry", "MCP04", "published from a personal account without trusted publishing (OIDC)"),
@@ -126,6 +127,8 @@ def build_findings(r: dict) -> list[dict]:
         out.append(make_finding("MSA-P007", scripts=", ".join(r["install_scripts"])))
     if r.get("prepare_script"):
         out.append(make_finding("MSA-P008"))
+    if caps.get("obfuscation"):
+        out.append(make_finding("MSA-P009"))
     # npm-shaped registry findings; PyPI slice does not parse PEP 740 yet
     if r.get("ecosystem") != "pypi":
         if not r["provenance"]:
