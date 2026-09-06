@@ -55,6 +55,28 @@ def test_clean_package_scores_zero():
     assert all(v == 0 for v in caps.values())
 
 
+def test_detects_python_capabilities():
+    tgz = make_tgz({
+        "pkg/server.py": (
+            "import subprocess, os, urllib.request\n"
+            "subprocess.Popen(['ls'])\n"
+            "urllib.request.urlopen('https://x')\n"
+            "open('/etc/passwd')\n"
+            "print(os.environ['HOME'])\n"
+            "eval('1')\n"
+            "from mcp.server.stdio import stdio_server\n"
+        ),
+    })
+    caps, n = scan_tarball(tgz)
+    assert n == 1
+    assert caps["exec"] >= 1
+    assert caps["network_out"] >= 1
+    assert caps["filesystem"] >= 1
+    assert caps["env_read"] >= 1
+    assert caps["eval"] >= 1
+    assert caps["stdio"] >= 1
+
+
 def test_empty_tarball_is_safe():
     caps, n = scan_tarball(None)
     assert n == 0

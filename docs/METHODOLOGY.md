@@ -15,7 +15,8 @@ priority-one security report — see SECURITY.md.)
 | Source | What we read | Why it's trustworthy enough |
 |---|---|---|
 | `registry.npmjs.org` metadata JSON | version list, `dependencies`, `dist` (tarball URL, attestations, signatures), `_npmUser`, `maintainers`, `time` | The registry is the source of truth for what `npm install` would fetch. We read the same document your package manager reads. |
-| Published tarball (`.tgz`) | source files (`*.js/mjs/cjs/ts`), `package.json` | This is the exact artifact that lands on disk at install time — not a repository snapshot that may differ from what shipped. |
+| `pypi.org/pypi/<pkg>/json` | `info.requires_dist`, sdist URL, author | Same JSON API `pip` uses. Thin slice: direct deps only, no PEP 740. |
+| Published tarball (npm `.tgz` or PyPI sdist) | source files (`*.js/mjs/cjs/ts/py`), `package.json` | This is the exact artifact that lands on disk at install time — not a repository snapshot that may differ from what shipped. |
 | Registry cache (`~/.cache/mcp-supply-audit`) | prior responses | Plain files; speeds up corpora, enables offline re-audits. Disable with `--no-cache`. |
 
 We deliberately do **not** read: GitHub repo contents (may not match the published
@@ -35,19 +36,26 @@ ranges (hyphen ranges with prereleases, complex unions) may resolve differently 
 Peer and optional dependencies are not traversed (npm would install peers; we undercount
 slightly). Both limits err toward *understating* tree size.
 
+**PyPI (`--ecosystem pypi`)** does not resolve a transitive tree. It scores the
+package's own `requires_dist` (extras skipped) and scans the published sdist.
+`transitive_deps` in the JSON is therefore *direct count*, not a tree. Registry
+score is a floor of 40 — PEP 740 attestations are not parsed, and npm-shaped
+findings `MSA-R001`–`R003` are suppressed so we do not pretend PyPI is npm.
+
 ## 3. Capability surface scan
 
 Regex patterns over tarball source (tests and `.d.ts` excluded, 400-file / 2 MB-per-file
-caps). Six signals:
+caps). Six signals. Python extras (`subprocess`, `httpx`, `os.environ`, …) apply
+**only** to `*.py` so the npm corpus scores do not drift.
 
 | Signal | Pattern family | Why it matters |
 |---|---|---|
-| `exec` | `child_process`, `spawn`, `execSync` | process execution — MCP05 |
-| `network_out` | `fetch`, `http.request`, `axios`, sockets | outbound data path |
-| `filesystem` | `fs.readFile/writeFile/...` | local data access |
-| `env_read` | `process.env` | credential access |
+| `exec` | `child_process`, `spawn`, `execSync`; `subprocess`, `Popen` | process execution — MCP05 |
+| `network_out` | `fetch`, `http.request`, `axios`; `httpx`, `urllib.request` | outbound data path |
+| `filesystem` | `fs.readFile/writeFile/...`; `open(`, `pathlib` | local data access |
+| `env_read` | `process.env`; `os.environ`, `os.getenv` | credential access |
 | `eval` | `eval(`, `new Function(` | dynamic code — MCP05 |
-| `stdio` | `StdioServerTransport` | STDIO transport — launch-command exposure |
+| `stdio` | `StdioServerTransport`; `stdio_server` | STDIO transport — launch-command exposure |
 
 **This is a surface scan, not behavior analysis.** A filesystem server *should* contain
 `fs.readFile`. The compound signals are where meaning lives: `filesystem + network_out` is

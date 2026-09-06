@@ -1,4 +1,4 @@
-"""Capability surface scan of a published npm tarball.
+"""Capability surface scan of a published tarball (npm .tgz or PyPI sdist).
 
 Reads source files and counts capability signals. The code is never
 executed — this is a regex surface scan, not a proof of behavior
@@ -10,17 +10,31 @@ import re
 import tarfile
 from typing import Optional
 
+# JS/TS patterns — keep stable; corpus scores are cited in the talk
 CAP_PATTERNS = {
     "exec": re.compile(r"child_process|execSync|spawnSync|\bspawn\(|\bexec\(", re.I),
     "network_out": re.compile(r"\bfetch\(|https?\.request|axios|net\.connect|new WebSocket|got\(", re.I),
-    "filesystem": re.compile(r"fs\.(readFile|writeFile|createReadStream|createWriteStream|readdir|rm\(|unlink)", re.I),
+    "filesystem": re.compile(
+        r"fs\.(readFile|writeFile|createReadStream|createWriteStream|readdir|rm\(|unlink)",
+        re.I,
+    ),
     "env_read": re.compile(r"process\.env"),
     "eval": re.compile(r"\beval\(|new Function\(", re.I),
     "stdio": re.compile(r"StdioServerTransport"),
 }
 
-SOURCE_EXT = re.compile(r"\.(js|mjs|cjs|ts)$")
-SKIP_PATHS = ("/test", "__tests__", ".test.", ".d.ts")
+# Applied only to *.py so npm corpus numbers do not drift
+PY_CAP_PATTERNS = {
+    "exec": re.compile(r"subprocess|os\.system|Popen\(", re.I),
+    "network_out": re.compile(r"urllib\.request|urlopen|httpx|requests\.|aiohttp", re.I),
+    "filesystem": re.compile(r"\bopen\(|pathlib\.Path", re.I),
+    "env_read": re.compile(r"os\.environ|os\.getenv"),
+    "eval": re.compile(r"\beval\(|\bexec\("),
+    "stdio": re.compile(r"stdio_server|StdioServerParameters"),
+}
+
+SOURCE_EXT = re.compile(r"\.(js|mjs|cjs|ts|py)$")
+SKIP_PATHS = ("/test", "/tests", "__tests__", ".test.", ".d.ts")
 
 
 def scan_tarball(
@@ -50,7 +64,8 @@ def scan_tarball(
                 except Exception:
                     continue
                 n += 1
-                for k, pat in CAP_PATTERNS.items():
+                patterns = PY_CAP_PATTERNS if m.name.endswith(".py") else CAP_PATTERNS
+                for k, pat in patterns.items():
                     caps[k] += len(pat.findall(src))
     except Exception:
         pass

@@ -20,6 +20,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   — the CI gate for silent floating-range moves.
 - Corpus report: `--report results.json` prints markdown headline numbers and a
   score table from a prior `--json` run (regenerates the tables in `corpus/README.md`).
+- PyPI thin slice: `--ecosystem pypi` fetches the PyPI JSON API, scans the published
+  sdist for capabilities (Python patterns on `*.py` only — JS regexes unchanged),
+  and scores direct `requires_dist` only. No transitive resolver and no PEP 740
+  provenance yet — documented as a first slice.
 
 ## [0.2.0] - 2026-09-07
 

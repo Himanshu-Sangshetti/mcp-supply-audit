@@ -126,12 +126,14 @@ def build_findings(r: dict) -> list[dict]:
         out.append(make_finding("MSA-P007", scripts=", ".join(r["install_scripts"])))
     if r.get("prepare_script"):
         out.append(make_finding("MSA-P008"))
-    if not r["provenance"]:
-        out.append(make_finding("MSA-R001"))
-    if not r["signatures"]:
-        out.append(make_finding("MSA-R002"))
-    if not r.get("publisher_trusted"):
-        out.append(make_finding("MSA-R003"))
+    # npm-shaped registry findings; PyPI slice does not parse PEP 740 yet
+    if r.get("ecosystem") != "pypi":
+        if not r["provenance"]:
+            out.append(make_finding("MSA-R001"))
+        if not r["signatures"]:
+            out.append(make_finding("MSA-R002"))
+        if not r.get("publisher_trusted"):
+            out.append(make_finding("MSA-R003"))
     if caps.get("stdio"):
         out.append(make_finding("MSA-S001"))
     if r.get("sdk_range") is None:

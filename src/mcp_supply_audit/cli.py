@@ -11,7 +11,7 @@ import sys
 from typing import Optional
 
 from . import __version__
-from .audit import audit_package, sdk_baseline
+from .audit import audit_package, audit_pypi_package, sdk_baseline
 from .diff import diff_audits
 from .lock import check_lock, default_lock_path, read_lock, write_lock
 from .registry import Registry
@@ -29,7 +29,10 @@ def _print_human(r: dict) -> None:
     if "error" in r:
         print(f"\n{r['package']}: ERROR {r['error']}")
         return
-    trusted = "trusted publisher (OIDC)" if r.get("publisher_trusted") else "personal account"
+    if r.get("ecosystem") == "pypi":
+        trusted = "PyPI; OIDC/PEP 740 not parsed"
+    else:
+        trusted = "trusted publisher (OIDC)" if r.get("publisher_trusted") else "personal account"
     print(f"\n{r['package']}@{r['version']}")
     print(f"  publisher: {r['publisher']} ({trusted}) · latest release: {(r.get('latest_release') or '?')[:10]}")
     print(
@@ -38,11 +41,18 @@ def _print_human(r: dict) -> None:
         f"sdk {_bar(r['score_sdk'])} {r['score_sdk']:3d}"
     )
     print(f"  overall {r['score_overall']}/100")
-    print(
-        f"  deps: {r['transitive_deps']} transitive (depth {r['tree_depth']}, "
-        f"{r['floating_direct']}/{r['direct_deps']} direct floating) · "
-        f"provenance: {'yes' if r['provenance'] else 'NO'}"
-    )
+    if r.get("ecosystem") == "pypi":
+        print(
+            f"  deps: {r['direct_deps']} direct requires_dist "
+            f"({r['floating_direct']} floating; no transitive resolver) · "
+            f"provenance: not parsed (PEP 740)"
+        )
+    else:
+        print(
+            f"  deps: {r['transitive_deps']} transitive (depth {r['tree_depth']}, "
+            f"{r['floating_direct']}/{r['direct_deps']} direct floating) · "
+            f"provenance: {'yes' if r['provenance'] else 'NO'}"
+        )
     caps = {k: v for k, v in r["capabilities"].items() if v}
     if caps:
         print("  capabilities: " + ", ".join(f"{k} x{v}" for k, v in caps.items()))
@@ -75,6 +85,9 @@ def main(argv: Optional[list[str]] = None) -> int:
                     help="exit 1 if any audited package scores below N")
     ap.add_argument("--no-cache", action="store_true", help="disable the on-disk registry cache")
     ap.add_argument("--workers", type=int, default=6, help="parallel audits for corpora")
+    ap.add_argument("--ecosystem", choices=("npm", "pypi"), default="npm",
+                    help="package ecosystem (default: npm). pypi is a thin first slice: "
+                         "direct requires_dist + sdist scan, no transitive resolver")
     ap.add_argument("-V", "--tool-version", action="version", version=f"mcp-supply-audit {__version__}")
     args = ap.parse_args(argv)
 
@@ -90,6 +103,22 @@ def main(argv: Optional[list[str]] = None) -> int:
         ap.error("give at least one package name, or --corpus FILE, or --report FILE")
 
     registry = Registry(use_cache=not args.no_cache)
+    if args.ecosystem == "pypi":
+        results = []
+        for p in packages:
+            results.append(audit_pypi_package(p, version=args.version, registry=registry))
+        if args.json:
+            print(json.dumps({"tool": "mcp-supply-audit", "tool_version": __version__,
+                              "ecosystem": "pypi", "results": results}, indent=2))
+        else:
+            for r in results:
+                _print_human(r)
+        if args.fail_under is not None:
+            for r in results:
+                if "error" not in r and r["score_overall"] < args.fail_under:
+                    return 1
+        return 0
+
     sdk_latest, sdk_meta = sdk_baseline(registry)
 
     if args.diff:

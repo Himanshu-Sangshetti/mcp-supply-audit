@@ -39,6 +39,7 @@ mcp-supply-audit <pkg> --sbom > bom.json      # CycloneDX 1.5 from the resolved 
 mcp-supply-audit <pkg> --lock                 # pin the resolved tree (writes <pkg>.msa.lock.json)
 mcp-supply-audit <pkg> --check pkg.msa.lock.json   # CI: exit 1 if the tree drifted
 mcp-supply-audit --report results.json            # markdown headline + score tables
+mcp-supply-audit mcp --ecosystem pypi             # PyPI thin slice (direct deps + sdist scan)
 ```
 
 **Diff mode** compares two releases of the same package — the postmark-mcp attack was
@@ -114,7 +115,10 @@ Different tools watch different boundaries — they complement each other:
   server *should* read files. Use scores for triage, not verdicts.
 - **Signal, not verdict.** A personal publisher account lowers the registry score; plenty of
   excellent servers are personally published.
-- **npm only, for now.** PyPI servers are on the roadmap.
+- **PyPI is a thin first slice.** `--ecosystem pypi` scans the published sdist and
+  scores *direct* `requires_dist` only. There is no transitive resolver and no PEP 740
+  provenance parse yet — registry score is a floor (40). Do not cite PyPI scores as
+  equivalent to the npm corpus.
 - **Mini-semver.** The range resolver handles the forms that appear in real MCP
   package.json files; it is not a complete node-semver.
 - **Point-in-time.** A scan is a snapshot. Re-run it on every update — every update is a new
@@ -122,7 +126,7 @@ Different tools watch different boundaries — they complement each other:
 
 ## Roadmap
 
-- PyPI ecosystem support
+- PyPI transitive resolver + PEP 740 provenance
 - Tree-hash pinning + drift detection (fail CI when a server's resolved tree changes)
 - Optional tool-description scanning (complementing, not duplicating, description analyzers)
 - Score badge endpoint for READMEs

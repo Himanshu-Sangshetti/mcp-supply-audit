@@ -24,7 +24,7 @@ ruff check src tests
 ## Good first contributions
 
 - Corpus expansion (see `corpus/corpus.txt` — suggest widely-installed MCP servers)
-- PyPI ecosystem support (see roadmap in README)
+- PyPI transitive resolver + PEP 740 (thin `--ecosystem pypi` slice already ships)
 - Capability-pattern calibration (with false-positive analysis, please)
 - Docs improvements and translations
 
