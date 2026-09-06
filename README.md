@@ -94,7 +94,8 @@ popular community servers, and the Chinese ecosystem). Headline base rates:
 | **70%** | have no build provenance |
 | **72** | median overall score (spread 57–88) |
 
-Full data, method, and reproduction steps: [`corpus/`](corpus/README.md). One command
+Full data, method, and reproduction steps: [`corpus/`](corpus/README.md). What
+each score band means: [`docs/CALIBRATION.md`](docs/CALIBRATION.md). One command
 re-runs the entire study.
 
 ## How this fits with other tools

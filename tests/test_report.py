@@ -37,6 +37,7 @@ def test_headlines_ignore_errors():
     assert h["oidc_pct"] == 50
     assert h["lifecycle"] == ["b"]
     assert h["score_median"] == 71
+    assert h["bands"] == {"85-100": 0, "70-84": 2, "55-69": 0, "0-54": 0}
 
 
 def test_markdown_contains_tables():
@@ -46,3 +47,16 @@ def test_markdown_contains_tables():
     assert "`c`" not in md
     assert md.index("`b`") < md.index("`a`") or "73" in md  # sorted by score; a=70 first
     assert "| `a` |" in md.split("## Scores")[1]  # a is lower, listed first
+    assert "| 70–84 typical | 2 |" in md
+
+
+def test_calibration_bands_match_corpus_snapshot():
+    """docs/CALIBRATION.md numbers are locked to corpus/results.json."""
+    import json
+    from pathlib import Path
+
+    from mcp_supply_audit.report import _results, score_bands
+
+    path = Path(__file__).resolve().parents[1] / "corpus" / "results.json"
+    bands = score_bands(_results(json.loads(path.read_text())))
+    assert bands == {"85-100": 4, "70-84": 28, "55-69": 15, "0-54": 0}

@@ -118,7 +118,8 @@ conservative but imprecise.
   an issue about a specific rule.
 - **Triage, not verdict.** A 72 does not mean "malicious"; it means "this much unverified
   surface." The corpus median is 72 *because the ecosystem's defaults are loose*, not
-  because the ecosystem is hostile.
+  because the ecosystem is hostile. Per-band counts and wording:
+  [`CALIBRATION.md`](CALIBRATION.md).
 - **Floors and ceilings are deliberate.** Nothing scores below 0; nothing is penalized
   twice for the same root cause within a layer.
 

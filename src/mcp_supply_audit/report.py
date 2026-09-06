@@ -42,7 +42,24 @@ def headlines(results: list[dict]) -> dict:
         "score_median": int(statistics.median(scores)),
         "score_min": min(scores),
         "score_max": max(scores),
+        "bands": score_bands(results),
     }
+
+
+def score_bands(results: list[dict]) -> dict[str, int]:
+    """Overall-score buckets used in docs/CALIBRATION.md."""
+    buckets = {"85-100": 0, "70-84": 0, "55-69": 0, "0-54": 0}
+    for r in results:
+        s = r.get("score_overall") or 0
+        if s >= 85:
+            buckets["85-100"] += 1
+        elif s >= 70:
+            buckets["70-84"] += 1
+        elif s >= 55:
+            buckets["55-69"] += 1
+        else:
+            buckets["0-54"] += 1
+    return buckets
 
 
 def to_markdown(doc: Union[dict, list]) -> str:
@@ -74,6 +91,15 @@ def to_markdown(doc: Union[dict, list]) -> str:
         f"| Published via OIDC trusted publishing | {h['oidc_pct']}% |",
         f"| Install-time lifecycle scripts | {life_cell} |",
         f"| Overall score | median {h['score_median']} · spread {h['score_min']}–{h['score_max']} |",
+        "",
+        "## Score bands (see docs/CALIBRATION.md)",
+        "",
+        "| Band | Servers |",
+        "|---|---:|",
+        f"| 85–100 tight | {h['bands']['85-100']} |",
+        f"| 70–84 typical | {h['bands']['70-84']} |",
+        f"| 55–69 loose | {h['bands']['55-69']} |",
+        f"| 0–54 weak | {h['bands']['0-54']} |",
         "",
         "## Scores (low to high)",
         "",

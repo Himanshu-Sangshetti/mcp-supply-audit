@@ -22,7 +22,7 @@ against the live npm registry.
 | No provenance attestation | 70% |
 | Published via OIDC trusted publishing | 28% |
 | Install-time lifecycle scripts (`postinstall`) | 1 server (`@wonderwhy-er/desktop-commander`) |
-| Overall score | median 72 · spread 57–88 |
+| Overall score | median 72 · spread 57–88 (bands: 4 tight / 28 typical / 15 loose / 0 weak — [`docs/CALIBRATION.md`](../docs/CALIBRATION.md)) |
 
 ## Re-run history
 

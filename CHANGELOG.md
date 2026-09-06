@@ -13,6 +13,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Known exfil/paste/tunnel hosts (`giftshop.club`, webhook.site, ngrok, …) →
   `MSA-P010`. Install-time remote fetch / hook-file network → `MSA-P011`.
   Both score-neutral. SARIF rules 22 → 24.
+- `docs/CALIBRATION.md` — what 85–100 / 70–84 / 55–69 / 0–54 mean against the
+  47-server corpus (4 / 28 / 15 / 0). `--report` prints the band table.
+  Scoring values unchanged.
 - Diff mode: `mcp-supply-audit <pkg> --diff <v1> <v2>` compares two releases of the same
   package — the rug-pull detector. New findings: `MSA-D001` lifecycle script added (HIGH),
   `MSA-D002` publisher changed (HIGH), `MSA-D003` provenance dropped, `MSA-D004` new
