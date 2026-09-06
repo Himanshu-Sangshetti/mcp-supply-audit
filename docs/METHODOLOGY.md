@@ -57,6 +57,12 @@ caps). Six signals. Python extras (`subprocess`, `httpx`, `os.environ`, …) app
 | `eval` | `eval(`, `new Function(` | dynamic code — MCP05 |
 | `stdio` | `StdioServerTransport`; `stdio_server` | STDIO transport — launch-command exposure |
 | `obfuscation` | `atob` / `Buffer.from(...,'base64')` / `fromCharCode` / `b64decode`; ≥20 `\\xNN` escapes in one file | decode-then-run shape — MCP05. **Finding only (`MSA-P009`). Does not change scores.** |
+| `exfil_host` | `giftshop.club`, webhook.site, requestbin, ngrok, pastebin, discord webhooks, telegram bots, interact.sh, oast, burpcollaborator | known sink / OOB host — MCP04. **`MSA-P010`. Score-neutral.** |
+
+Install-time scripts whose *command* curls/wgets/pipes-to-shell, or whose
+`postinstall.js` / `preinstall.js` / `install.js` contains outbound network, raise
+`MSA-P011` (also score-neutral). A local `node postinstall.js` that only writes
+files is P007 only.
 
 **This is a surface scan, not behavior analysis.** A filesystem server *should* contain
 `fs.readFile`. The compound signals are where meaning lives: `filesystem + network_out` is

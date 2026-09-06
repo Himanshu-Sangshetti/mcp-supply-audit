@@ -1,7 +1,7 @@
 """Per-package audit orchestration. Read-only: nothing is ever executed."""
 from typing import Optional
 
-from .capabilities import scan_lifecycle_scripts, scan_tarball
+from .capabilities import scan_lifecycle_chain, scan_lifecycle_scripts, scan_tarball
 from .pypi import is_unpinned, parse_requires, pypi_meta, sdist_url
 from .registry import Registry
 from .scoring import (
@@ -67,8 +67,9 @@ def audit_package(
     # Capability surface (tarball read, never executed)
     tarball_url = dist.get("tarball")
     tgz = registry.tarball(tarball_url, pkg, tag) if tarball_url else None
-    caps, files_scanned = scan_tarball(tgz)
+    caps, files_scanned, exfil_hosts = scan_tarball(tgz)
     install_scripts, git_dep_scripts = scan_lifecycle_scripts(tgz)
+    lifecycle_chain = scan_lifecycle_chain(tgz)
 
     # Transitive tree
     meta_cache = {pkg: meta, SDK_PKG: sdk_meta}
@@ -93,6 +94,8 @@ def audit_package(
         "files_scanned": files_scanned,
         "install_scripts": install_scripts,
         "prepare_script": bool(git_dep_scripts),
+        "exfil_hosts": exfil_hosts,
+        "lifecycle_chain": lifecycle_chain,
         "sdk_range": sdk_range,
         "sdk_resolved": sdk_resolved,
         "sdk_latest": sdk_latest,
@@ -127,7 +130,7 @@ def audit_pypi_package(
     floating = sum(1 for _, spec in reqs if is_unpinned(spec))
     url = sdist_url(meta)
     tgz = registry.fetch_bytes(url, f"pypi_{pkg}-{tag}") if url else None
-    caps, files_scanned = scan_tarball(tgz)
+    caps, files_scanned, exfil_hosts = scan_tarball(tgz)
     sdk_hits = [n for n, _ in reqs if n.lower() in ("mcp", "fastmcp")]
     if not sdk_hits and pkg.lower() in ("mcp", "fastmcp"):
         sdk_hits = [pkg]  # the audited package *is* the SDK
@@ -151,6 +154,8 @@ def audit_pypi_package(
         "files_scanned": files_scanned,
         "install_scripts": [],
         "prepare_script": False,
+        "exfil_hosts": exfil_hosts,
+        "lifecycle_chain": [],
         "sdk_range": sdk_hits[0] if sdk_hits else None,
         "sdk_resolved": None,
         "sdk_latest": None,

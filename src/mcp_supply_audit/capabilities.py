@@ -44,6 +44,29 @@ OBFUSCATION_PATTERNS = (
 HEX_ESCAPES = re.compile(r"\\x[0-9a-fA-F]{2}")
 HEX_ESCAPE_FLOOR = 20
 
+# High-signal hosts — pastebins, tunnels, OOB collaborators, the postmark sink.
+# Score-neutral. Do not add generic CDNs or github.com.
+EXFIL_HOSTS = (
+    ("webhook.site", re.compile(r"webhook\.site", re.I)),
+    ("requestbin", re.compile(r"requestbin(?:\.com|\.net)?", re.I)),
+    ("pipedream.net", re.compile(r"pipedream\.net", re.I)),
+    ("interact.sh", re.compile(r"interact\.sh", re.I)),
+    ("ngrok", re.compile(r"ngrok(?:-free)?\.(?:io|app|dev)", re.I)),
+    ("pastebin.com", re.compile(r"pastebin\.com", re.I)),
+    ("discord-webhook", re.compile(r"discord(?:app)?\.com/api/webhooks", re.I)),
+    ("telegram-bot", re.compile(r"api\.telegram\.org/bot", re.I)),
+    ("giftshop.club", re.compile(r"giftshop\.club", re.I)),
+    ("burpcollaborator", re.compile(r"burpcollaborator\.net", re.I)),
+    ("oast", re.compile(r"oast(?:ify)?\.(?:com|fun|pro)", re.I)),
+)
+
+# Install-script *command* that fetches remote or pipes to a shell.
+REMOTE_INSTALL = re.compile(
+    r"https?://|\bcurl\b|\bwget\b|\|\s*(?:ba)?sh\b|powershell\s+-(?:enc|e\b)|Invoke-WebRequest",
+    re.I,
+)
+HOOK_BASENAME = re.compile(r"^(preinstall|install|postinstall)\.[cm]?[jt]s$")
+
 SOURCE_EXT = re.compile(r"\.(js|mjs|cjs|ts|py)$")
 SKIP_PATHS = ("/test", "/tests", "__tests__", ".test.", ".d.ts")
 
@@ -56,14 +79,21 @@ def obfuscation_hits(src: str) -> int:
     return n
 
 
+def exfil_host_hits(src: str) -> list[str]:
+    """Known exfil / paste / tunnel hosts in source. Heuristic, not proof."""
+    return [name for name, pat in EXFIL_HOSTS if pat.search(src)]
+
+
 def scan_tarball(
     tgz_bytes: Optional[bytes], max_files: int = 400, max_file_size: int = 2_000_000
 ) -> tuple[dict[str, int], int]:
-    """Return (capabilities dict, files_scanned)."""
+    """Return (capabilities dict, files_scanned, unique exfil-host labels)."""
     caps = {k: 0 for k in CAP_PATTERNS}
     caps["obfuscation"] = 0
+    caps["exfil_host"] = 0
+    hosts: list[str] = []
     if not tgz_bytes:
-        return caps, 0
+        return caps, 0, []
     n = 0
     try:
         with tarfile.open(fileobj=io.BytesIO(tgz_bytes), mode="r:gz") as tf:
@@ -88,9 +118,13 @@ def scan_tarball(
                 for k, pat in patterns.items():
                     caps[k] += len(pat.findall(src))
                 caps["obfuscation"] += obfuscation_hits(src)
+                found = exfil_host_hits(src)
+                if found:
+                    caps["exfil_host"] += len(found)
+                    hosts.extend(found)
     except Exception:
         pass
-    return caps, n
+    return caps, n, sorted(set(hosts))
 
 
 # Scripts that execute on the CONSUMER's machine during `npm install <pkg>`
@@ -131,3 +165,51 @@ def scan_lifecycle_scripts(tgz_bytes: Optional[bytes]) -> tuple[list[str], list[
     install_time = [s for s in INSTALL_TIME_SCRIPTS if scripts.get(s)]
     git_dep = [s for s in GIT_DEP_SCRIPTS if scripts.get(s)]
     return install_time, git_dep
+
+
+def scan_lifecycle_chain(tgz_bytes: Optional[bytes]) -> list[str]:
+    """Install-time scripts that fetch remote or whose hook file has network_out.
+
+    Score-neutral. `npx` alone is not enough — too common in real packages.
+    """
+    flagged: list[str] = []
+    if not tgz_bytes:
+        return flagged
+    try:
+        with tarfile.open(fileobj=io.BytesIO(tgz_bytes), mode="r:gz") as tf:
+            member = next(
+                (m for m in tf.getmembers() if m.isfile() and m.name.endswith("package/package.json")),
+                None,
+            )
+            scripts: dict = {}
+            if member is not None:
+                f = tf.extractfile(member)
+                if f:
+                    pkg_json = json.loads(f.read().decode("utf-8", errors="ignore"))
+                    raw = pkg_json.get("scripts", {})
+                    if isinstance(raw, dict):
+                        scripts = raw
+            for s in INSTALL_TIME_SCRIPTS:
+                cmd = scripts.get(s)
+                if isinstance(cmd, str) and REMOTE_INSTALL.search(cmd) and s not in flagged:
+                    flagged.append(s)
+            if any(scripts.get(s) for s in INSTALL_TIME_SCRIPTS):
+                for m in tf.getmembers():
+                    if not m.isfile():
+                        continue
+                    base = m.name.rsplit("/", 1)[-1]
+                    hit = HOOK_BASENAME.match(base)
+                    if not hit:
+                        continue
+                    name = hit.group(1)
+                    fh = tf.extractfile(m)
+                    if not fh:
+                        continue
+                    src = fh.read().decode("utf-8", errors="ignore")
+                    if name not in flagged and (
+                        CAP_PATTERNS["network_out"].search(src) or exfil_host_hits(src)
+                    ):
+                        flagged.append(name)
+    except Exception:
+        return flagged
+    return flagged

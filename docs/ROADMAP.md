@@ -10,11 +10,11 @@ Status of work that is shipped, next, or blocked on a public launch.
 - `--report` corpus markdown from a prior JSON run
 - `--ecosystem pypi` thin slice (direct `requires_dist` + sdist scan; no transitive tree, no PEP 740)
 - 47-server npm corpus with published base rates
+- Score-neutral pattern findings: `MSA-P009` obfuscation, `MSA-P010` known exfil hosts,
+  `MSA-P011` install-time remote fetch
 
 ## Next
 
-- Capability patterns v2 remainder: obvious exfil endpoints, suspicious postinstall chains
-  (obfuscation slice ships as `MSA-P009`, score-neutral)
 - Semver edge cases (hyphen ranges, `||` + prerelease) to match node-semver more closely
 - Score calibration note: what each band means against the corpus
 - `--explain <finding-id>` — full rationale + remediation

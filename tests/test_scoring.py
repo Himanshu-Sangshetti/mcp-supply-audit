@@ -42,6 +42,30 @@ def test_sdk_scoring():
     assert score_sdk("1.9.0", "1.9.0", "1.9.0", True) == 90    # stdio
 
 
+def test_exfil_findings_do_not_change_score():
+    caps = dict(NO_CAPS, exfil_host=2)
+    assert score_package(10, 0, caps) == 100
+    r = {
+        "transitive_deps": 3,
+        "floating_direct": 0,
+        "capabilities": caps,
+        "exfil_hosts": ["giftshop.club"],
+        "lifecycle_chain": ["postinstall"],
+        "provenance": True,
+        "signatures": 1,
+        "publisher_trusted": True,
+        "sdk_range": "1.0.0",
+        "sdk_resolved": "1.0.0",
+        "sdk_latest": "1.0.0",
+        "install_scripts": [],
+        "prepare_script": False,
+    }
+    ids = {f["id"] for f in build_findings(r)}
+    assert "MSA-P010" in ids
+    assert "MSA-P011" in ids
+    assert "giftshop.club" in next(f["message"] for f in build_findings(r) if f["id"] == "MSA-P010")
+
+
 def test_obfuscation_finding_does_not_change_score():
     caps = dict(NO_CAPS, obfuscation=4)
     assert score_package(10, 0, caps) == 100

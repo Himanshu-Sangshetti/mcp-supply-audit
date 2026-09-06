@@ -10,6 +10,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Obfuscation surface scan (`atob`, `Buffer.from(...,'base64')`, `fromCharCode`,
   `b64decode`, dense `\\xNN` escapes) → finding `MSA-P009` (MED, MCP05).
   **Does not change scores** — corpus numbers stay valid. SARIF rules 21 → 22.
+- Known exfil/paste/tunnel hosts (`giftshop.club`, webhook.site, ngrok, …) →
+  `MSA-P010`. Install-time remote fetch / hook-file network → `MSA-P011`.
+  Both score-neutral. SARIF rules 22 → 24.
 - Diff mode: `mcp-supply-audit <pkg> --diff <v1> <v2>` compares two releases of the same
   package — the rug-pull detector. New findings: `MSA-D001` lifecycle script added (HIGH),
   `MSA-D002` publisher changed (HIGH), `MSA-D003` provenance dropped, `MSA-D004` new
