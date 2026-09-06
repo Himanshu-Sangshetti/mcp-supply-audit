@@ -11,7 +11,7 @@ INFORMATION_URI = "https://github.com/Himanshu-Sangshetti/mcp-supply-audit"
 def _rule_short(template: str) -> str:
     """Static rule text: drop the em-dash tail and scrub {placeholders}."""
     head = template.split("—")[0].strip()
-    return re.sub(r"\s*\{[^}]*\}\s*", " ", head).strip()
+    return re.sub(r"\s*\{[^}]*\}\s*", " ", head).strip().rstrip(":").strip()
 
 
 def to_sarif(results: list[dict]) -> dict[str, object]:
