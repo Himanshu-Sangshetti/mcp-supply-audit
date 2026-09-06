@@ -8,7 +8,8 @@ If you find a security issue in mcp-supply-audit itself, please report it privat
 - Subject line: `[mcp-supply-audit security] ...`
 
 Please do not open a public issue for vulnerabilities. We aim to acknowledge within
-72 hours.
+72 hours and to ship a fix or a documented mitigation within 90 days of a confirmed
+report.
 
 ## Scope notes
 

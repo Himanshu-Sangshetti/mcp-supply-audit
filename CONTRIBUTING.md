@@ -16,10 +16,13 @@ Thanks for helping make MCP supply-chain auditing better.
 
 ```bash
 git clone <repo> && cd mcp-supply-audit
-python3 -m pip install -e . pytest ruff
-python3 -m pytest tests/ -q
+python3 -m pip install -e ".[dev]"
+python3 -m pytest tests/ --cov=mcp_supply_audit
 ruff check src tests
 ```
+
+One logical change per commit. Conventional commits: `feat:`, `fix:`, `docs:`, `test:`, `ci:`, `refactor:`.
+Scoring or capability-pattern changes need a CHANGELOG entry — the talk cites corpus numbers.
 
 ## Good first contributions
 
@@ -27,8 +30,3 @@ ruff check src tests
 - PyPI transitive resolver + PEP 740 (thin `--ecosystem pypi` slice already ships)
 - Capability-pattern calibration (with false-positive analysis, please)
 - Docs improvements and translations
-
-## Commit style
-
-Conventional commits: `feat:`, `fix:`, `docs:`, `test:`, `ci:`, `refactor:`.
-One logical change per commit.

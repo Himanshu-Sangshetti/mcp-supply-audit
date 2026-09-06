@@ -52,4 +52,5 @@ def resolve_tree(
                 if dver:
                     resolved[d] = dver
                     nxt.append((d, dver, depth + 1))
+        frontier = nxt
     return len(seen), depth_reached, sorted(resolved.items())

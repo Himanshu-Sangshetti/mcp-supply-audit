@@ -25,6 +25,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   and scores direct `requires_dist` only. No transitive resolver and no PEP 740
   provenance yet — documented as a first slice.
 
+### Fixed
+- `resolve_tree` never advanced its BFS frontier, so any audit that reached a
+  second hop hung forever. This was untested — corpus numbers came from a
+  cached run. Tests now cover tree resolution, registry cache, SARIF, CLI, and
+  the audit orchestrator.
+
+### Changed
+- GitHub Action installs the action checkout instead of `pipx run` from PyPI (usable
+  before a public publish). CI now has `contents: read`, a wheel-install job, and
+  coverage on the test matrix. Dev extra: `pip install -e ".[dev]"`.
+
 ## [0.2.0] - 2026-09-07
 
 ### Added

@@ -126,12 +126,14 @@ Different tools watch different boundaries — they complement each other:
 
 ## Roadmap
 
-- PyPI transitive resolver + PEP 740 provenance
-- Tree-hash pinning + drift detection (fail CI when a server's resolved tree changes)
-- Optional tool-description scanning (complementing, not duplicating, description analyzers)
-- Score badge endpoint for READMEs
+Shipped vs next vs blocked: [`docs/ROADMAP.md`](docs/ROADMAP.md). Next up is
+obfuscation-aware capability patterns and a real PyPI tree (today's `--ecosystem pypi`
+is a thin slice — do not cite it as corpus-equivalent).
 
 ## GitHub Action
+
+The action installs this repo checkout (not PyPI), so it works before a public
+publish. Pin a tag once one exists.
 
 ```yaml
 - uses: Himanshu-Sangshetti/mcp-supply-audit@v1

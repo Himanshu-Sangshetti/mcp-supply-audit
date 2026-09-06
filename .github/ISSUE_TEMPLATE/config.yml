@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security report
+    url: https://github.com/Himanshu-Sangshetti/mcp-supply-audit/blob/main/SECURITY.md
+    about: Vulnerabilities in the auditor itself — email, don't open a public issue
+  - name: OWASP MCP Top 10
+    url: https://owasp.org/www-project-mcp-top-10/
+    about: Finding IDs map here (MCP01–MCP10). This is vocabulary, not a verdict.
