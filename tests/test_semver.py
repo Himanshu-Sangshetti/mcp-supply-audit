@@ -44,6 +44,39 @@ def test_max_satisfying_skips_prerelease():
     assert max_satisfying(versions, "^5.0.0") is None
 
 
+def test_hyphen_range_inclusive():
+    assert satisfies("1.2.3", "1.2.3 - 2.0.0")
+    assert satisfies("1.9.0", "1.2.3 - 2.0.0")
+    assert satisfies("2.0.0", "1.2.3 - 2.0.0")
+    assert not satisfies("2.0.1", "1.2.3 - 2.0.0")
+    assert not satisfies("1.2.2", "1.2.3 - 2.0.0")
+
+
+def test_hyphen_partial_upper_is_exclusive_next():
+    # node-semver: `1.2 - 2` ⇒ >=1.2.0 <3.0.0
+    assert satisfies("1.2.0", "1.2 - 2")
+    assert satisfies("2.9.9", "1.2 - 2")
+    assert not satisfies("3.0.0", "1.2 - 2")
+    assert not satisfies("1.1.9", "1.2 - 2")
+
+
+def test_union_ignores_empty_alt():
+    assert satisfies("1.4.0", "^1.0.0 ||")
+    assert not satisfies("2.0.0", "^1.0.0 ||")
+
+
+def test_prerelease_does_not_satisfy_stable_range():
+    assert not satisfies("1.2.3-beta.1", "^1.0.0")
+    assert not satisfies("1.2.3-beta.1", "1.2.3")
+    assert satisfies("1.2.3-beta.1", ">=1.2.3-0")
+
+
+def test_max_satisfying_includes_prerelease_only_when_asked():
+    versions = ["1.0.0", "1.1.0-rc.1", "1.1.0"]
+    assert max_satisfying(versions, "^1.0.0") == "1.1.0"
+    assert max_satisfying(versions, "^1.1.0-rc") == "1.1.0"
+
+
 def test_is_floating():
     assert is_floating("^1.0.0")
     assert is_floating("~1.0.0")

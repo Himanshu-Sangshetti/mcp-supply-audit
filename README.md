@@ -122,8 +122,8 @@ Different tools watch different boundaries — they complement each other:
   scores *direct* `requires_dist` only. There is no transitive resolver and no PEP 740
   provenance parse yet — registry score is a floor (40). Do not cite PyPI scores as
   equivalent to the npm corpus.
-- **Mini-semver.** The range resolver handles the forms that appear in real MCP
-  package.json files; it is not a complete node-semver.
+- **Mini-semver.** Handles `^` `~` comparators x-ranges `||` and hyphen ranges.
+  Prereleases match only when the range mentions one. Not a complete node-semver.
 - **Point-in-time.** A scan is a snapshot. Re-run it on every update — every update is a new
   supply-chain decision.
 

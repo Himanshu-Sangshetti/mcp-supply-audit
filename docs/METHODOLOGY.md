@@ -30,10 +30,11 @@ artifact), download counts (popularity ≠ risk), or README claims (marketing, n
 - We count **unique package names**, not total installed copies — npm dedupes, and
   "unique names" is the number that matters for "how many strangers' code am I running".
 
-**Known limits:** the resolver handles the range forms seen in real MCP package.json files
-(`^`, `~`, exact, comparators, x-ranges, `||`). It is not a complete node-semver; exotic
-ranges (hyphen ranges with prereleases, complex unions) may resolve differently than npm.
-Peer and optional dependencies are not traversed (npm would install peers; we undercount
+**Known limits:** the resolver handles `^` `~` exact comparators x-ranges `||` and
+hyphen ranges (`1.2.3 - 2.0.0`; partial upper bounds exclusive-next, like node-semver).
+Prereleases are skipped unless the range itself mentions a prerelease. It is still
+not a complete node-semver (build metadata, hyphen+prerelease unions). Peer and
+optional dependencies are not traversed (npm would install peers; we undercount
 slightly). Both limits err toward *understating* tree size.
 
 **PyPI (`--ecosystem pypi`)** does not resolve a transitive tree. It scores the

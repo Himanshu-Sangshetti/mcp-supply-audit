@@ -38,6 +38,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   the audit orchestrator.
 
 ### Changed
+- Semver: hyphen ranges (`1.2.3 - 2.0.0`, partial exclusive-next), empty `||`
+  alternatives ignored, prereleases only satisfy a range that mentions one.
+  Scoring values unchanged.
 - GitHub Action installs the action checkout instead of `pipx run` from PyPI (usable
   before a public publish). CI now has `contents: read`, a wheel-install job, and
   coverage on the test matrix. Dev extra: `pip install -e ".[dev]"`.

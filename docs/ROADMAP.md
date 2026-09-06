@@ -12,10 +12,10 @@ Status of work that is shipped, next, or blocked on a public launch.
 - 47-server npm corpus with published base rates
 - Score-neutral pattern findings: `MSA-P009` obfuscation, `MSA-P010` known exfil hosts,
   `MSA-P011` install-time remote fetch
+- Hyphen ranges + prerelease-aware max-satisfying (still not full node-semver)
 
 ## Next
 
-- Semver edge cases (hyphen ranges, `||` + prerelease) to match node-semver more closely
 - Score calibration note: what each band means against the corpus
 - `--explain <finding-id>` — full rationale + remediation
 - PyPI transitive resolver + PEP 740 provenance (do not cite today's PyPI scores as corpus-equivalent)
