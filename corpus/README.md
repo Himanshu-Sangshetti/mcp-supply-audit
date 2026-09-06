@@ -34,8 +34,7 @@ pip install mcp-supply-audit
 mcp-supply-audit --corpus corpus.txt --json > results.json
 ```
 
-(`corpus.txt` is one package name per line; the exact list used for this run is in the
-talk repo and will be moved here before v0.1 publication.)
+(`corpus.txt` — one package name per line — is the exact list audited in this run.)
 
 ## Caveats
 
