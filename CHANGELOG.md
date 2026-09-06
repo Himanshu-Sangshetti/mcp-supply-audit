@@ -15,6 +15,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - SBOM output: `mcp-supply-audit <pkg> --sbom` emits CycloneDX 1.5 from the resolved
   transitive tree (`pkg:npm/...` PURLs). `resolve_tree` now also returns the named
   package/version list used for the BOM.
+- Tree-hash locking: `--lock` writes a pin file (SHA-256 over package version +
+  resolved tree + install scripts + publisher). `--check FILE` exits 1 on drift
+  — the CI gate for silent floating-range moves.
 
 ## [0.2.0] - 2026-09-07
 

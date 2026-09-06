@@ -13,6 +13,7 @@ from typing import Optional
 from . import __version__
 from .audit import audit_package, sdk_baseline
 from .diff import diff_audits
+from .lock import check_lock, default_lock_path, read_lock, write_lock
 from .registry import Registry
 from .sarif import to_sarif
 from .sbom import to_cyclonedx
@@ -63,6 +64,10 @@ def main(argv: Optional[list[str]] = None) -> int:
     ap.add_argument("--json", action="store_true", help="emit JSON")
     ap.add_argument("--sarif", action="store_true", help="emit SARIF 2.1.0")
     ap.add_argument("--sbom", action="store_true", help="emit CycloneDX 1.5 SBOM (single package)")
+    ap.add_argument("--lock", nargs="?", const="", metavar="FILE",
+                    help="write a tree-hash pin file (default: <pkg>.msa.lock.json)")
+    ap.add_argument("--check", metavar="FILE",
+                    help="exit 1 if the live tree drifted from the pin file")
     ap.add_argument("--fail-under", type=int, default=None,
                     help="exit 1 if any audited package scores below N")
     ap.add_argument("--no-cache", action="store_true", help="disable the on-disk registry cache")
@@ -139,6 +144,26 @@ def main(argv: Optional[list[str]] = None) -> int:
                     tag = "ERR " if "error" in r else f"{r['score_overall']:3d}"
                     print(f"[{i:2d}/{len(packages)}] {tag} {p}", file=sys.stderr)
         results.sort(key=lambda r: r.get("score_overall", -1))
+
+    if args.lock is not None or args.check:
+        if len(results) != 1 or "error" in results[0]:
+            ap.error("--lock / --check take exactly one auditable package")
+        r = results[0]
+        if args.lock is not None:
+            path = args.lock or default_lock_path(r["package"])
+            lock = write_lock(path, r)
+            print(f"wrote {path}  tree_hash={lock['tree_hash'][:12]}…  "
+                  f"{lock['transitive_deps']} deps", file=sys.stderr)
+        if args.check:
+            pin = read_lock(args.check)
+            drift = check_lock(pin, r)
+            if drift:
+                print(f"DRIFT {r['package']}@{r.get('version')}", file=sys.stderr)
+                for reason in drift:
+                    print(f"  {reason}", file=sys.stderr)
+                return 1
+            print(f"OK {r['package']}@{r.get('version')} matches {args.check}", file=sys.stderr)
+            return 0
 
     if args.sbom:
         if len(results) != 1 or "error" in results[0]:
