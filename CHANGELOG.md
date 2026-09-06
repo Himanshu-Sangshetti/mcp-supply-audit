@@ -45,6 +45,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   the audit orchestrator.
 
 ### Changed
+- Holistic review: README install path is the GitHub clone (not PyPI), Action pin
+  is `@v0.2.0` not a fictional `@v1`, rubric lists the −20 lifecycle deduction,
+  stale "next up is obfuscation" line removed.
 - Semver: hyphen ranges (`1.2.3 - 2.0.0`, partial exclusive-next), empty `||`
   alternatives ignored, prereleases only satisfy a range that mentions one.
   Scoring values unchanged.

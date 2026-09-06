@@ -107,9 +107,9 @@ The score reflects *verifiability*, not *trustworthiness of the author*.
   SDK-currency question doesn't apply, so we mark it INFO and take a flat deduction for
   unaudited surface).
 
-**Known limits:** only the TypeScript SDK is tracked. Python (`mcp` package) servers are
-on the roadmap; until then they score the flat "no official SDK dep" deduction, which is
-conservative but imprecise.
+**Known limits:** only the TypeScript SDK is tracked for currency. `--ecosystem pypi`
+recognizes `mcp` / `fastmcp` as the SDK name but does not resolve a version yet, so
+Python servers still get a coarse SDK score.
 
 ## 6. Scoring philosophy
 

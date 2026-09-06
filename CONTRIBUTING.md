@@ -15,7 +15,7 @@ Thanks for helping make MCP supply-chain auditing better.
 ## Dev setup
 
 ```bash
-git clone <repo> && cd mcp-supply-audit
+git clone https://github.com/Himanshu-Sangshetti/mcp-supply-audit && cd mcp-supply-audit
 python3 -m pip install -e ".[dev]"
 python3 -m pytest tests/ --cov=mcp_supply_audit
 ruff check src tests

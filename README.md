@@ -23,9 +23,9 @@ $ uvx mcp-supply-audit @modelcontextprotocol/server-filesystem
 ## Install & run
 
 ```bash
-uvx mcp-supply-audit <npm-package>        # zero-install via uv
-pipx run mcp-supply-audit <npm-package>   # or pipx
-pip install mcp-supply-audit              # or into your env
+git clone https://github.com/Himanshu-Sangshetti/mcp-supply-audit
+cd mcp-supply-audit && pip install -e ".[dev]"
+# not on PyPI yet — uvx / pipx / pip install mcp-supply-audit will fail until publish
 ```
 
 ```bash
@@ -58,7 +58,7 @@ Zero runtime dependencies. Python ≥ 3.9. Works offline once the registry cache
 
 | Layer | Signals | Source |
 |---|---|---|
-| **Package** | full transitive dependency count + depth, floating direct ranges (`^`/`~`/`*`), lifecycle scripts (`preinstall`/`install`/`postinstall` run on the consumer's machine; `prepare` runs for git-dep installs), capability surface of the published tarball (process exec, outbound network, filesystem, env reads, `eval`, STDIO transport) | live registry metadata + tarball source, read never executed |
+| **Package** | transitive tree, floating ranges, lifecycle scripts, capability surface (exec / network / fs / env / eval / STDIO), plus score-neutral `MSA-P009`–`P011` (obfuscation, known sink hosts, install-time remote fetch) | live registry metadata + tarball source, never executed |
 | **Registry** | `dist.attestations.provenance`, `dist.signatures`, `_npmUser.trustedPublisher` (OIDC vs personal account), publish recency | live registry metadata |
 | **SDK** | `@modelcontextprotocol/sdk` range vs the current release, floating SDK ranges, STDIO transport usage | registry + source |
 
@@ -76,6 +76,7 @@ Explicit points, no black box — the same philosophy as OpenSSF Scorecard.
 | `eval` | −10 | | | no official SDK dep | −20 |
 | fs + network (exfil shape) | −15 | | | | |
 | env + network | −5 | | | | |
+| install-time scripts | −20 | | | | |
 
 Overall = mean of the three layer scores. Every finding carries an ID (`MSA-*`), a severity,
 a layer, and an **OWASP MCP Top 10** mapping (MCP01 secrets, MCP04 supply chain, MCP05
@@ -133,9 +134,8 @@ Different tools watch different boundaries — they complement each other:
 
 ## Roadmap
 
-Shipped vs next vs blocked: [`docs/ROADMAP.md`](docs/ROADMAP.md). Next up is
-obfuscation-aware capability patterns and a real PyPI tree (today's `--ecosystem pypi`
-is a thin slice — do not cite it as corpus-equivalent).
+Shipped vs next vs blocked: [`docs/ROADMAP.md`](docs/ROADMAP.md). Next is a real
+PyPI tree + PEP 740 (today's `--ecosystem pypi` is a thin slice).
 
 ## GitHub Action
 
@@ -143,7 +143,7 @@ The action installs this repo checkout (not PyPI), so it works before a public
 publish. Pin a tag once one exists.
 
 ```yaml
-- uses: Himanshu-Sangshetti/mcp-supply-audit@v1
+- uses: Himanshu-Sangshetti/mcp-supply-audit@v0.2.0
   with:
     package: "@modelcontextprotocol/server-filesystem"
     fail-under: 60

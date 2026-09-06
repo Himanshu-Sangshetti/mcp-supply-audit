@@ -48,7 +48,7 @@ unchanged — they don't depend on either change.
 ## Reproduce
 
 ```bash
-pip install mcp-supply-audit          # or: pip install -e . from a clone (pre-PyPI)
+pip install -e .                      # from a clone; not on PyPI yet
 mcp-supply-audit --corpus corpus.txt --json > results.json
 ```
 

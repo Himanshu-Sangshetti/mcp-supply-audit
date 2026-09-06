@@ -24,6 +24,6 @@ Status of work that is shipped, next, or blocked on a public launch.
 
 ## Blocked on public launch
 
-Repo URLs, the GitHub Action marketplace listing, and `pip install mcp-supply-audit`
-from PyPI all assume a GitHub + PyPI publish. That is a deliberate hold — local
-commits only until the owner decides to launch.
+Private GitHub repo exists (`Himanshu-Sangshetti/mcp-supply-audit`). Still held:
+making it public, marketplace Action listing, and `pip install mcp-supply-audit`
+from PyPI.

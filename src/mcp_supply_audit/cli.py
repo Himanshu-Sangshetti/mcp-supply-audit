@@ -1,9 +1,4 @@
-"""mcp-supply-audit CLI.
-
-Usage:
-  mcp-supply-audit <package> [--version V] [--json] [--sarif] [--fail-under N]
-  mcp-supply-audit --corpus packages.txt [--json] [--sarif] [--fail-under N]
-"""
+"""mcp-supply-audit CLI. See --help for the full command list."""
 import argparse
 import concurrent.futures as cf
 import json
