@@ -38,6 +38,7 @@ mcp-supply-audit <pkg> --diff 1.0.15 1.0.16   # rug-pull detector: what changed 
 mcp-supply-audit <pkg> --sbom > bom.json      # CycloneDX 1.5 from the resolved tree
 mcp-supply-audit <pkg> --lock                 # pin the resolved tree (writes <pkg>.msa.lock.json)
 mcp-supply-audit <pkg> --check pkg.msa.lock.json   # CI: exit 1 if the tree drifted
+mcp-supply-audit --report results.json            # markdown headline + score tables
 ```
 
 **Diff mode** compares two releases of the same package — the postmark-mcp attack was

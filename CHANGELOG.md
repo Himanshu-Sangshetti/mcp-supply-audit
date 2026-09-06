@@ -18,6 +18,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Tree-hash locking: `--lock` writes a pin file (SHA-256 over package version +
   resolved tree + install scripts + publisher). `--check FILE` exits 1 on drift
   — the CI gate for silent floating-range moves.
+- Corpus report: `--report results.json` prints markdown headline numbers and a
+  score table from a prior `--json` run (regenerates the tables in `corpus/README.md`).
 
 ## [0.2.0] - 2026-09-07
 

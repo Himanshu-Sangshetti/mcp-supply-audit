@@ -15,6 +15,7 @@ from .audit import audit_package, sdk_baseline
 from .diff import diff_audits
 from .lock import check_lock, default_lock_path, read_lock, write_lock
 from .registry import Registry
+from .report import to_markdown
 from .sarif import to_sarif
 from .sbom import to_cyclonedx
 
@@ -68,6 +69,8 @@ def main(argv: Optional[list[str]] = None) -> int:
                     help="write a tree-hash pin file (default: <pkg>.msa.lock.json)")
     ap.add_argument("--check", metavar="FILE",
                     help="exit 1 if the live tree drifted from the pin file")
+    ap.add_argument("--report", metavar="FILE",
+                    help="render a markdown corpus report from a results.json")
     ap.add_argument("--fail-under", type=int, default=None,
                     help="exit 1 if any audited package scores below N")
     ap.add_argument("--no-cache", action="store_true", help="disable the on-disk registry cache")
@@ -79,8 +82,12 @@ def main(argv: Optional[list[str]] = None) -> int:
     if args.corpus:
         with open(args.corpus) as f:
             packages += [ln.strip() for ln in f if ln.strip() and not ln.startswith("#")]
+    if args.report:
+        with open(args.report) as f:
+            print(to_markdown(json.load(f)), end="")
+        return 0
     if not packages:
-        ap.error("give at least one package name, or --corpus FILE")
+        ap.error("give at least one package name, or --corpus FILE, or --report FILE")
 
     registry = Registry(use_cache=not args.no_cache)
     sdk_latest, sdk_meta = sdk_baseline(registry)
