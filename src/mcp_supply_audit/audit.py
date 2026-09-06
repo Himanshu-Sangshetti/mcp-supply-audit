@@ -71,7 +71,7 @@ def audit_package(
 
     # Transitive tree
     meta_cache = {pkg: meta, SDK_PKG: sdk_meta}
-    tree_n, depth = resolve_tree(pkg, tag, registry, meta_cache)
+    tree_n, depth, resolved = resolve_tree(pkg, tag, registry, meta_cache)
 
     result = {
         "package": pkg,
@@ -87,6 +87,7 @@ def audit_package(
         "floating_direct": floating,
         "transitive_deps": tree_n,
         "tree_depth": depth,
+        "resolved_tree": [{"name": n, "version": v} for n, v in resolved],
         "capabilities": caps,
         "files_scanned": files_scanned,
         "install_scripts": install_scripts,

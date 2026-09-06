@@ -12,6 +12,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `MSA-D002` publisher changed (HIGH), `MSA-D003` provenance dropped, `MSA-D004` new
   exec/eval capability, `MSA-D005` fs+network exfil shape newly formed, `MSA-D006`
   dependency-tree growth. SARIF rule count: 15 → 21.
+- SBOM output: `mcp-supply-audit <pkg> --sbom` emits CycloneDX 1.5 from the resolved
+  transitive tree (`pkg:npm/...` PURLs). `resolve_tree` now also returns the named
+  package/version list used for the BOM.
 
 ## [0.2.0] - 2026-09-07
 

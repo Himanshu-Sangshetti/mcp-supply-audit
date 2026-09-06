@@ -11,11 +11,16 @@ def resolve_tree(
     registry: Registry,
     meta_cache: Optional[dict[str, dict]] = None,
     max_depth: int = 8,
-) -> tuple[int, int]:
-    """BFS over registry metadata. Returns (unique_dep_count, max_depth_reached)."""
+) -> tuple[int, int, list[tuple[str, str]]]:
+    """BFS over registry metadata.
+
+    Returns (unique_dep_count, max_depth_reached, resolved) where resolved is
+    a sorted list of (package, version) pairs — the basis for SBOM output.
+    """
     if meta_cache is None:
         meta_cache = {}
-    seen = set()
+    seen: set[str] = set()
+    resolved: dict[str, str] = {}
     frontier = [(root_pkg, root_ver, 0)]
     depth_reached = 0
     while frontier:
@@ -45,6 +50,6 @@ def resolve_tree(
                     continue
                 dver = max_satisfying(list(dmeta.get("versions", {}).keys()), rng)
                 if dver:
+                    resolved[d] = dver
                     nxt.append((d, dver, depth + 1))
-        frontier = nxt
-    return len(seen), depth_reached
+    return len(seen), depth_reached, sorted(resolved.items())

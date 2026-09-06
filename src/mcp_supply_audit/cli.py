@@ -15,6 +15,7 @@ from .audit import audit_package, sdk_baseline
 from .diff import diff_audits
 from .registry import Registry
 from .sarif import to_sarif
+from .sbom import to_cyclonedx
 
 
 def _bar(score: int, width: int = 10) -> str:
@@ -61,6 +62,7 @@ def main(argv: Optional[list[str]] = None) -> int:
                     help="diff two versions of one package (rug-pull detector)")
     ap.add_argument("--json", action="store_true", help="emit JSON")
     ap.add_argument("--sarif", action="store_true", help="emit SARIF 2.1.0")
+    ap.add_argument("--sbom", action="store_true", help="emit CycloneDX 1.5 SBOM (single package)")
     ap.add_argument("--fail-under", type=int, default=None,
                     help="exit 1 if any audited package scores below N")
     ap.add_argument("--no-cache", action="store_true", help="disable the on-disk registry cache")
@@ -138,7 +140,11 @@ def main(argv: Optional[list[str]] = None) -> int:
                     print(f"[{i:2d}/{len(packages)}] {tag} {p}", file=sys.stderr)
         results.sort(key=lambda r: r.get("score_overall", -1))
 
-    if args.sarif:
+    if args.sbom:
+        if len(results) != 1 or "error" in results[0]:
+            ap.error("--sbom takes exactly one auditable package")
+        print(json.dumps(to_cyclonedx(results[0]), indent=2))
+    elif args.sarif:
         print(json.dumps(to_sarif(results), indent=2))
     elif args.json:
         print(json.dumps({"tool": "mcp-supply-audit", "tool_version": __version__,
