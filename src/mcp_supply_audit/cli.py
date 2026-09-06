@@ -41,8 +41,9 @@ def _print_human(r: dict) -> None:
     print(f"  overall {r['score_overall']}/100")
     if r.get("ecosystem") == "pypi":
         print(
-            f"  deps: {r['direct_deps']} direct requires_dist "
-            f"({r['floating_direct']} floating; no transitive resolver) · "
+            f"  deps: {r['transitive_deps']} unique (depth {r['tree_depth']}, "
+            f"{r['floating_direct']}/{r['direct_deps']} direct floating; "
+            f"latest-for-unpinned, no PEP 440) · "
             f"provenance: not parsed (PEP 740)"
         )
     else:
@@ -104,8 +105,8 @@ def main(argv: Optional[list[str]] = None) -> int:
     ap.add_argument("--no-cache", action="store_true", help="disable the on-disk registry cache")
     ap.add_argument("--workers", type=int, default=6, help="parallel audits for corpora")
     ap.add_argument("--ecosystem", choices=("npm", "pypi"), default="npm",
-                    help="package ecosystem (default: npm). pypi is a thin first slice: "
-                         "direct requires_dist + sdist scan, no transitive resolver")
+                    help="package ecosystem (default: npm). pypi: sdist scan + thin "
+                         "requires_dist tree (latest for unpinned; no PEP 440 / PEP 740)")
     ap.add_argument("--completions", metavar="SHELL",
                     help=f"print a completion script ({', '.join(SHELLS)})")
     ap.add_argument("-V", "--tool-version", action="version", version=f"mcp-supply-audit {__version__}")

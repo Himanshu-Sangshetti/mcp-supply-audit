@@ -37,11 +37,11 @@ not a complete node-semver (build metadata, hyphen+prerelease unions). Peer and
 optional dependencies are not traversed (npm would install peers; we undercount
 slightly). Both limits err toward *understating* tree size.
 
-**PyPI (`--ecosystem pypi`)** does not resolve a transitive tree. It scores the
-package's own `requires_dist` (extras skipped) and scans the published sdist.
-`transitive_deps` in the JSON is therefore *direct count*, not a tree. Registry
-score is a floor of 40 — PEP 740 attestations are not parsed, and npm-shaped
-findings `MSA-R001`–`R003` are suppressed so we do not pretend PyPI is npm.
+**PyPI (`--ecosystem pypi`)** BFS-walks `requires_dist` (extras skipped, depth-capped
+at 6). `==` pins are fetched by version; every other spec resolves to the
+registry *latest* — not a PEP 440 solver, so trees can disagree with `pip`.
+Registry score is a floor of 40 — PEP 740 is not parsed, and npm-shaped findings
+`MSA-R001`–`R003` are suppressed so we do not pretend PyPI is npm.
 
 ## 3. Capability surface scan
 

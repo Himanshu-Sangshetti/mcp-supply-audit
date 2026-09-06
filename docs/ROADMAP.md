@@ -8,7 +8,7 @@ Status of work that is shipped, next, or blocked on a public launch.
 - `--json`, `--sarif`, `--fail-under` for CI
 - `--diff` rug-pull detector, `--sbom` CycloneDX 1.5, `--lock` / `--check` tree-hash pin
 - `--report` corpus markdown from a prior JSON run
-- `--ecosystem pypi` thin slice (direct `requires_dist` + sdist scan; no transitive tree, no PEP 740)
+- `--ecosystem pypi` sdist scan + thin `requires_dist` tree (latest for unpinned; no PEP 440 / PEP 740)
 - 47-server npm corpus with published base rates
 - Score-neutral pattern findings: `MSA-P009` obfuscation, `MSA-P010` known exfil hosts,
   `MSA-P011` install-time remote fetch
@@ -19,7 +19,7 @@ Status of work that is shipped, next, or blocked on a public launch.
 
 ## Next
 
-- PyPI transitive resolver + PEP 740 provenance (do not cite today's PyPI scores as corpus-equivalent)
+- PEP 440 max-satisfying + PEP 740 provenance (do not cite PyPI scores as corpus-equivalent)
 
 ## Good first issues
 

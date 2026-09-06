@@ -46,6 +46,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 - Good-first-issue backlog (GFI-1 … GFI-7) in `docs/ROADMAP.md`.
+- PyPI thin tree: `--ecosystem pypi` BFS-walks `requires_dist` (latest for
+  unpinned, `==` pins, extras skipped, depth 6). Not PEP 440. npm rubric
+  values unchanged.
 - Holistic review: README install path is the GitHub clone (not PyPI), Action pin
   is `@v0.2.0` not a fictional `@v1`, rubric lists the −20 lifecycle deduction,
   stale "next up is obfuscation" line removed.

@@ -39,7 +39,7 @@ mcp-supply-audit <pkg> --sbom > bom.json      # CycloneDX 1.5 from the resolved 
 mcp-supply-audit <pkg> --lock                 # pin the resolved tree (writes <pkg>.msa.lock.json)
 mcp-supply-audit <pkg> --check pkg.msa.lock.json   # CI: exit 1 if the tree drifted
 mcp-supply-audit --report results.json            # markdown headline + score tables
-mcp-supply-audit mcp --ecosystem pypi             # PyPI thin slice (direct deps + sdist scan)
+mcp-supply-audit mcp --ecosystem pypi             # PyPI: sdist scan + thin requires_dist tree
 mcp-supply-audit --explain MSA-P007               # why this finding exists + what to do
 mcp-supply-audit --explain                        # all finding ids
 eval "$(mcp-supply-audit --completions bash)"     # bash; also zsh, fish
@@ -123,10 +123,10 @@ Different tools watch different boundaries — they complement each other:
   they do not change scores.
 - **Signal, not verdict.** A personal publisher account lowers the registry score; plenty of
   excellent servers are personally published.
-- **PyPI is a thin first slice.** `--ecosystem pypi` scans the published sdist and
-  scores *direct* `requires_dist` only. There is no transitive resolver and no PEP 740
-  provenance parse yet — registry score is a floor (40). Do not cite PyPI scores as
-  equivalent to the npm corpus.
+- **PyPI tree is thin.** `--ecosystem pypi` walks `requires_dist` (extras skipped),
+  pinning `==` and taking *latest* for everything else. Not a PEP 440 solver, no
+  PEP 740. Registry score is a floor (40). Do not cite PyPI scores as equivalent
+  to the npm corpus.
 - **Mini-semver.** Handles `^` `~` comparators x-ranges `||` and hyphen ranges.
   Prereleases match only when the range mentions one. Not a complete node-semver.
 - **Point-in-time.** A scan is a snapshot. Re-run it on every update — every update is a new

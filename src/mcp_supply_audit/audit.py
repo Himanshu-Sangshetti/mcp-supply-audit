@@ -2,7 +2,7 @@
 from typing import Optional
 
 from .capabilities import scan_lifecycle_chain, scan_lifecycle_scripts, scan_tarball
-from .pypi import is_unpinned, parse_requires, pypi_meta, sdist_url
+from .pypi import is_unpinned, parse_requires, pypi_meta, resolve_pypi_tree, sdist_url
 from .registry import Registry
 from .scoring import (
     build_findings,
@@ -115,7 +115,7 @@ def audit_pypi_package(
     version: Optional[str] = None,
     registry: Optional[Registry] = None,
 ) -> dict:
-    """Thin PyPI slice: metadata + sdist scan. No transitive resolver yet."""
+    """PyPI audit: sdist scan + thin requires_dist tree (latest for unpinned)."""
     registry = registry or Registry()
     meta = pypi_meta(registry, pkg, version)
     if "__error__" in meta:
@@ -128,6 +128,7 @@ def audit_pypi_package(
     )
     reqs = parse_requires(info.get("requires_dist"))
     floating = sum(1 for _, spec in reqs if is_unpinned(spec))
+    tree_n, depth, resolved = resolve_pypi_tree(registry, pkg, reqs)
     url = sdist_url(meta)
     tgz = registry.fetch_bytes(url, f"pypi_{pkg}-{tag}") if url else None
     caps, files_scanned, exfil_hosts = scan_tarball(tgz)
@@ -147,9 +148,9 @@ def audit_pypi_package(
         "signatures": 0,
         "direct_deps": len(reqs),
         "floating_direct": floating,
-        "transitive_deps": len(reqs),  # direct only — no resolver yet
-        "tree_depth": 1,
-        "resolved_tree": [{"name": n, "version": s} for n, s in reqs],
+        "transitive_deps": tree_n,
+        "tree_depth": depth,
+        "resolved_tree": [{"name": n, "version": v} for n, v in resolved],
         "capabilities": caps,
         "files_scanned": files_scanned,
         "install_scripts": [],
@@ -160,7 +161,7 @@ def audit_pypi_package(
         "sdk_resolved": None,
         "sdk_latest": None,
     }
-    result["score_package"] = score_package(len(reqs), floating, caps, 0)
+    result["score_package"] = score_package(tree_n, floating, caps, 0)
     result["score_registry"] = score_registry(False, False, False)
     result["score_sdk"] = score_sdk(result["sdk_range"], None, None, caps.get("stdio", 0) > 0)
     result["score_overall"] = round(
