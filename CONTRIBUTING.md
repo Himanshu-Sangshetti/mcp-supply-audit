@@ -26,7 +26,4 @@ Scoring or capability-pattern changes need a CHANGELOG entry — the talk cites 
 
 ## Good first contributions
 
-- Corpus expansion (see `corpus/corpus.txt` — suggest widely-installed MCP servers)
-- PyPI transitive resolver + PEP 740 (thin `--ecosystem pypi` slice already ships)
-- Capability-pattern calibration (with false-positive analysis, please)
-- Docs improvements and translations
+Concrete starter tasks with scope and pitfalls: [`docs/ROADMAP.md`](docs/ROADMAP.md#good-first-issues) (GFI-1 … GFI-7).

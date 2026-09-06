@@ -45,6 +45,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   the audit orchestrator.
 
 ### Changed
+- Good-first-issue backlog (GFI-1 … GFI-7) in `docs/ROADMAP.md`.
 - Holistic review: README install path is the GitHub clone (not PyPI), Action pin
   is `@v0.2.0` not a fictional `@v1`, rubric lists the −20 lifecycle deduction,
   stale "next up is obfuscation" line removed.

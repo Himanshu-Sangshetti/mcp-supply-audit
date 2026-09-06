@@ -151,8 +151,8 @@ publish. Pin a tag once one exists.
 
 ## Contributing
 
-Issues and PRs welcome — especially corpus expansion, ecosystem support, and rubric
-calibration. The rubric is deliberately explicit so it can be debated in public.
+Issues and PRs welcome. Starter tasks: [`docs/ROADMAP.md`](docs/ROADMAP.md#good-first-issues).
+The rubric is deliberately explicit so it can be debated in public.
 
 ## License & citation
 
