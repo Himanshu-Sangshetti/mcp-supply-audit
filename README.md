@@ -34,7 +34,14 @@ mcp-supply-audit <pkg> --json             # machine-readable
 mcp-supply-audit <pkg> --sarif > r.sarif  # GitHub code scanning
 mcp-supply-audit <pkg> --fail-under 70    # CI gate: exit 1 below 70
 mcp-supply-audit --corpus servers.txt     # audit a whole list
+mcp-supply-audit <pkg> --diff 1.0.15 1.0.16   # rug-pull detector: what changed between versions
 ```
+
+**Diff mode** compares two releases of the same package — the postmark-mcp attack was
+invisible to version-based scanning (clean tree in both v1.0.15 and v1.0.16), but a diff
+sees what *changed*: new lifecycle scripts (`MSA-D001`, HIGH), publisher changes
+(`MSA-D002`, HIGH), dropped provenance, newly-appeared exec/eval capabilities, a
+newly-formed filesystem+network exfil shape, and dependency-tree growth.
 
 Zero runtime dependencies. Python ≥ 3.9. Works offline once the registry cache is warm
 (`~/.cache/mcp-supply-audit`, override with `MCP_SUPPLY_AUDIT_CACHE`).

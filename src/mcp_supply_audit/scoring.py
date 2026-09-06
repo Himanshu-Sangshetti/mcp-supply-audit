@@ -28,6 +28,12 @@ FINDINGS = {
     "MSA-S002": ("MED", "sdk", "MCP04", "MCP SDK is behind the current {baseline} baseline (resolved {resolved})"),
     "MSA-S003": ("LOW", "sdk", "MCP04", "floating SDK range — SDK upgrades arrive unreviewed"),
     "MSA-S004": ("INFO", "sdk", "MCP04", "no @modelcontextprotocol/sdk dependency detected (custom or non-TS implementation)"),
+    "MSA-D001": ("HIGH", "diff", "MCP04", "lifecycle script added in {v}: {scripts} — install-time execution appeared between versions"),
+    "MSA-D002": ("HIGH", "diff", "MCP04", "publisher changed between versions ({a} → {b}) — account-takeover / rug-pull signal"),
+    "MSA-D003": ("MED", "diff", "MCP04", "provenance attestation dropped in {v} — build origin no longer verifiable"),
+    "MSA-D004": ("MED", "diff", "MCP05", "new capability appeared in {v}: {caps}"),
+    "MSA-D005": ("MED", "diff", "MCP04", "filesystem + network newly combined in {v} — the exfil shape appeared between versions"),
+    "MSA-D006": ("LOW", "diff", "MCP04", "dependency tree grew {a} → {b} packages — new unread code"),
 }
 
 SEVERITY_ORDER = {"INFO": 0, "LOW": 1, "MED": 2, "HIGH": 3}

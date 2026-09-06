@@ -6,6 +6,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+- Diff mode: `mcp-supply-audit <pkg> --diff <v1> <v2>` compares two releases of the same
+  package — the rug-pull detector. New findings: `MSA-D001` lifecycle script added (HIGH),
+  `MSA-D002` publisher changed (HIGH), `MSA-D003` provenance dropped, `MSA-D004` new
+  exec/eval capability, `MSA-D005` fs+network exfil shape newly formed, `MSA-D006`
+  dependency-tree growth. SARIF rule count: 15 → 21.
+
 ## [0.2.0] - 2026-09-07
 
 ### Added

@@ -12,6 +12,7 @@ from typing import Optional
 
 from . import __version__
 from .audit import audit_package, sdk_baseline
+from .diff import diff_audits
 from .registry import Registry
 from .sarif import to_sarif
 
@@ -56,6 +57,8 @@ def main(argv: Optional[list[str]] = None) -> int:
     ap.add_argument("packages", nargs="*", help="npm package names to audit")
     ap.add_argument("--corpus", help="file with one package name per line")
     ap.add_argument("--version", help="package version to audit (default: latest)")
+    ap.add_argument("--diff", nargs=2, metavar=("V1", "V2"),
+                    help="diff two versions of one package (rug-pull detector)")
     ap.add_argument("--json", action="store_true", help="emit JSON")
     ap.add_argument("--sarif", action="store_true", help="emit SARIF 2.1.0")
     ap.add_argument("--fail-under", type=int, default=None,
@@ -74,6 +77,46 @@ def main(argv: Optional[list[str]] = None) -> int:
 
     registry = Registry(use_cache=not args.no_cache)
     sdk_latest, sdk_meta = sdk_baseline(registry)
+
+    if args.diff:
+        if len(packages) != 1:
+            ap.error("--diff takes exactly one package")
+        v1, v2 = args.diff
+        ra = audit_package(packages[0], version=v1, registry=registry,
+                           sdk_latest=sdk_latest, _sdk_meta=sdk_meta)
+        rb = audit_package(packages[0], version=v2, registry=registry,
+                           sdk_latest=sdk_latest, _sdk_meta=sdk_meta)
+        for r in (ra, rb):
+            if "error" in r:
+                print(f"\n{r['package']}: ERROR {r['error']}")
+                return 1
+        d = diff_audits(ra, rb)
+        if args.json:
+            print(json.dumps({"package": packages[0], "diff": d,
+                              "v1": ra, "v2": rb}, indent=2))
+            return 0
+        sd = d["score_delta"]
+        print(f"\n{packages[0]} {d['from']} → {d['to']}")
+        print(
+            f"  scores: package {ra['score_package']} → {rb['score_package']} ({sd['package']:+d}) · "
+            f"registry {ra['score_registry']} → {rb['score_registry']} ({sd['registry']:+d}) · "
+            f"sdk {ra['score_sdk']} → {rb['score_sdk']} ({sd['sdk']:+d})"
+        )
+        print(f"  overall {ra['score_overall']} → {rb['score_overall']} ({sd['overall']:+d})")
+        if d["capability_delta"]:
+            print("  capabilities: " + ", ".join(
+                f"{k} {v:+d}" for k, v in d["capability_delta"].items()))
+        if d["transitive_deps_delta"]:
+            print(f"  deps: {ra['transitive_deps']} → {rb['transitive_deps']} transitive "
+                  f"({d['transitive_deps_delta']:+d})")
+        if d["findings"]:
+            for f in d["findings"]:
+                print(f"  {f['severity']:4s} [{f['layer']:7s}] {f['message']}  ({f['owasp']}, {f['id']})")
+        else:
+            print("  no new trust-relevant changes detected")
+        if args.fail_under is not None and rb["score_overall"] < args.fail_under:
+            return 1
+        return 0
 
     results = []
     if len(packages) == 1:
