@@ -13,6 +13,7 @@ from typing import Optional
 from . import __version__
 from .audit import audit_package, audit_pypi_package, sdk_baseline
 from .diff import diff_audits
+from .explain import explain, explain_all, known_ids
 from .lock import check_lock, default_lock_path, read_lock, write_lock
 from .registry import Registry
 from .report import to_markdown
@@ -81,6 +82,9 @@ def main(argv: Optional[list[str]] = None) -> int:
                     help="exit 1 if the live tree drifted from the pin file")
     ap.add_argument("--report", metavar="FILE",
                     help="render a markdown corpus report from a results.json")
+    ap.add_argument("--explain", nargs="?", const="*", metavar="ID",
+                    help="print rationale + remediation for a finding id (e.g. MSA-P007); "
+                         "omit ID to list all")
     ap.add_argument("--fail-under", type=int, default=None,
                     help="exit 1 if any audited package scores below N")
     ap.add_argument("--no-cache", action="store_true", help="disable the on-disk registry cache")
@@ -99,8 +103,17 @@ def main(argv: Optional[list[str]] = None) -> int:
         with open(args.report) as f:
             print(to_markdown(json.load(f)), end="")
         return 0
+    if args.explain is not None:
+        if args.explain == "*":
+            print(explain_all(), end="")
+            return 0
+        try:
+            print(explain(args.explain), end="")
+        except KeyError:
+            ap.error(f"unknown finding id {args.explain!r} — known: {', '.join(known_ids())}")
+        return 0
     if not packages:
-        ap.error("give at least one package name, or --corpus FILE, or --report FILE")
+        ap.error("give at least one package name, --corpus FILE, --report FILE, or --explain [ID]")
 
     registry = Registry(use_cache=not args.no_cache)
     if args.ecosystem == "pypi":

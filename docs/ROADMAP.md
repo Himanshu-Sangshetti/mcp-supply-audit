@@ -14,10 +14,10 @@ Status of work that is shipped, next, or blocked on a public launch.
   `MSA-P011` install-time remote fetch
 - Hyphen ranges + prerelease-aware max-satisfying (still not full node-semver)
 - Score calibration note (`docs/CALIBRATION.md`) against the 47-server snapshot
+- `--explain [ID]` rationale + remediation for every `MSA-*` finding
 
 ## Next
 
-- `--explain <finding-id>` — full rationale + remediation
 - PyPI transitive resolver + PEP 740 provenance (do not cite today's PyPI scores as corpus-equivalent)
 - Shell completions
 
