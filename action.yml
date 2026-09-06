@@ -19,6 +19,7 @@ inputs:
 runs:
   using: composite
   steps:
+    # NOTE: pipx run pulls from PyPI — works once the package is published (post-launch).
     - name: Audit MCP server supply chain
       shell: bash
       run: |

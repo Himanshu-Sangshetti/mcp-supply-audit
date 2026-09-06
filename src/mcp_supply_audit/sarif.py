@@ -1,10 +1,17 @@
 """SARIF 2.1.0 output for CI integration (GitHub code scanning, etc.)."""
+import re
 
 from . import __version__
 from .scoring import FINDINGS
 
 _SARIF_LEVEL = {"HIGH": "error", "MED": "warning", "LOW": "note", "INFO": "note"}
 INFORMATION_URI = "https://github.com/Himanshu-Sangshetti/mcp-supply-audit"
+
+
+def _rule_short(template: str) -> str:
+    """Static rule text: drop the em-dash tail and scrub {placeholders}."""
+    head = template.split("—")[0].strip()
+    return re.sub(r"\s*\{[^}]*\}\s*", " ", head).strip()
 
 
 def to_sarif(results: list[dict]) -> dict[str, object]:
@@ -14,7 +21,7 @@ def to_sarif(results: list[dict]) -> dict[str, object]:
         rules.append({
             "id": fid,
             "name": fid.replace("MSA-", "McpSupply"),
-            "shortDescription": {"text": f"[{layer}] {template.split('—')[0].strip()}"},
+            "shortDescription": {"text": f"[{layer}] {_rule_short(template)}"},
             "fullDescription": {"text": f"{template} (OWASP MCP Top 10: {owasp})"},
             "defaultConfiguration": {"level": _SARIF_LEVEL[sev]},
             "properties": {"layer": layer, "owasp": owasp, "severity": sev},

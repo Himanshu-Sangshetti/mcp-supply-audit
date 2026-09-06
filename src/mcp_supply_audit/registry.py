@@ -5,8 +5,10 @@ import urllib.error
 import urllib.request
 from typing import Optional
 
+from . import __version__
+
 REGISTRY = "https://registry.npmjs.org"
-UA = {"User-Agent": "mcp-supply-audit/0.1 (read-only audit; https://github.com/Himanshu-Sangshetti/mcp-supply-audit)"}
+UA = {"User-Agent": f"mcp-supply-audit/{__version__} (read-only audit; https://github.com/Himanshu-Sangshetti/mcp-supply-audit)"}
 
 
 def default_cache_dir() -> str:
