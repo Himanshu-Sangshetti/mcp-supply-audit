@@ -1,8 +1,11 @@
 """Per-package audit orchestration. Read-only: nothing is ever executed."""
 from .capabilities import scan_tarball
-from .registry import Registry, ckey, REGISTRY
+from .registry import Registry
 from .scoring import (
-    build_findings, score_package, score_registry, score_sdk,
+    build_findings,
+    score_package,
+    score_registry,
+    score_sdk,
 )
 from .semver import is_floating, max_satisfying
 from .tree import resolve_tree

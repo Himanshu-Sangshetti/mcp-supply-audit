@@ -1,6 +1,6 @@
 """SARIF 2.1.0 output for CI integration (GitHub code scanning, etc.)."""
 from . import __version__
-from .scoring import FINDINGS, SEVERITY_ORDER
+from .scoring import FINDINGS
 
 _SARIF_LEVEL = {"HIGH": "error", "MED": "warning", "LOW": "note", "INFO": "note"}
 INFORMATION_URI = "https://github.com/Himanshu-Sangshetti/mcp-supply-audit"

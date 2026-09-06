@@ -1,5 +1,5 @@
 """Transitive dependency tree resolution via live registry metadata."""
-from .registry import ckey, REGISTRY
+from .registry import REGISTRY, ckey
 from .semver import max_satisfying
 
 

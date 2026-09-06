@@ -28,26 +28,26 @@ def scan_tarball(tgz_bytes, max_files=400, max_file_size=2_000_000):
         return caps, 0
     n = 0
     try:
-        tf = tarfile.open(fileobj=io.BytesIO(tgz_bytes), mode="r:gz")
-        for m in tf.getmembers():
-            if n >= max_files:
-                break
-            if not m.isfile() or m.size > max_file_size:
-                continue
-            if not SOURCE_EXT.search(m.name):
-                continue
-            if any(s in m.name for s in SKIP_PATHS):
-                continue
-            f = tf.extractfile(m)
-            if not f:
-                continue
-            try:
-                src = f.read().decode("utf-8", errors="ignore")
-            except Exception:
-                continue
-            n += 1
-            for k, pat in CAP_PATTERNS.items():
-                caps[k] += len(pat.findall(src))
+        with tarfile.open(fileobj=io.BytesIO(tgz_bytes), mode="r:gz") as tf:
+            for m in tf.getmembers():
+                if n >= max_files:
+                    break
+                if not m.isfile() or m.size > max_file_size:
+                    continue
+                if not SOURCE_EXT.search(m.name):
+                    continue
+                if any(s in m.name for s in SKIP_PATHS):
+                    continue
+                f = tf.extractfile(m)
+                if not f:
+                    continue
+                try:
+                    src = f.read().decode("utf-8", errors="ignore")
+                except Exception:
+                    continue
+                n += 1
+                for k, pat in CAP_PATTERNS.items():
+                    caps[k] += len(pat.findall(src))
     except Exception:
         pass
     return caps, n

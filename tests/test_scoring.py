@@ -1,5 +1,8 @@
 from mcp_supply_audit.scoring import (
-    build_findings, score_package, score_registry, score_sdk,
+    build_findings,
+    score_package,
+    score_registry,
+    score_sdk,
 )
 
 NO_CAPS = {"exec": 0, "network_out": 0, "filesystem": 0, "env_read": 0, "eval": 0, "stdio": 0}

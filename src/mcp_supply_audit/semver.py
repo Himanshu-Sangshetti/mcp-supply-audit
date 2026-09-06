@@ -19,10 +19,7 @@ def satisfies(ver, rng):
     rng = (rng or "").strip()
     if rng in ("*", "", "latest", "x"):
         return True
-    for alt in rng.split("||"):
-        if _satisfies_and(pv, alt.strip()):
-            return True
-    return False
+    return any(_satisfies_and(pv, alt.strip()) for alt in rng.split("||"))
 
 
 def _satisfies_and(pv, alt):
